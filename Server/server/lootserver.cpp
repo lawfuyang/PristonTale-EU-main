@@ -783,9 +783,9 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 }
 
 // LOOT_MODE: Returns true if the item is acceptable — not a potion/crystal/core,
-// and either has no class restriction (JobBitCodeRandomCount == 0) or is
-// class-usable and passes the strict weapon/armor signature check.
-bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass iClass )
+// class-usable, passes the strict weapon/armor signature check, and is an
+// ilvl upgrade over the player's currently equipped item in that slot.
+bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass iClass, User* pcUser )
 {
 	DWORD eItemBase = dwItemCode & 0xFF000000;
 
@@ -800,8 +800,64 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 	if ( pDef->JobBitCodeRandomCount == 0 )
 		return true;
 
-	return ITEMSERVER->CharacterClassCanUseItem( iClass, pDef ) &&
-	       LootServer::IsItemAcceptableForClass( dwItemCode, iClass );
+	if ( !ITEMSERVER->CharacterClassCanUseItem( iClass, pDef ) ||
+	     !LootServer::IsItemAcceptableForClass( dwItemCode, iClass ) )
+		return false;
+
+	// ilvl upgrade check: reject if not better than currently equipped
+	if ( pcUser )
+	{
+		int iEquippedLevel = GetEquippedItemLevel( pDef, pcUser );
+		if ( iEquippedLevel > 0 && pDef->sItem.iLevel <= iEquippedLevel )
+			return false;
+	}
+
+	return true;
+}
+
+// Returns the ilvl of the player's equipped item in the same slot as pDef,
+// or 0 if nothing is equipped or the slot is not tracked.
+int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser )
+{
+	if ( !pDef || !pcUser )
+		return 0;
+
+	DWORD eItemType = pDef->sItem.sItemID.ToItemType();
+	DWORD eItemBase = eItemType & 0xFF000000;
+
+	EItemID eEquipped = (EItemID)0;
+
+	if ( eItemBase == ITEMBASE_Weapon )
+		eEquipped = pcUser->pcUserData->eWeaponEquipped;
+	else if ( eItemType == ITEMTYPE_Shield )
+		eEquipped = pcUser->pcUserData->eShieldEquipped;
+	else switch ( eItemType )
+	{
+	case ITEMTYPE_Armor:		eEquipped = pcUser->eArmorEquipped;		break;
+	case ITEMTYPE_Boots:		eEquipped = pcUser->eBootsEquipped;		break;
+	case ITEMTYPE_Gauntlets:	eEquipped = pcUser->eGauntletsEquipped;	break;
+	case ITEMTYPE_Bracelets:	eEquipped = pcUser->eBraceletEquipped;	break;
+	case ITEMTYPE_Ring:
+	case ITEMTYPE_Ring2:
+		// Compare against the lower-level ring so either ring slot gets an upgrade
+		{
+			auto pRingR = ITEMSERVER->FindItemDefByCode( pcUser->eRingRightEquipped );
+			auto pRingL = ITEMSERVER->FindItemDefByCode( pcUser->eRingLeftEquipped );
+			int iRingR = pRingR ? pRingR->sItem.iLevel : 0;
+			int iRingL = pRingL ? pRingL->sItem.iLevel : 0;
+			return ( iRingR > 0 && iRingL > 0 ) ? min( iRingR, iRingL ) : max( iRingR, iRingL );
+		}
+	case ITEMTYPE_Orb:			eEquipped = pcUser->eOrbEquipped;			break;
+	case ITEMTYPE_Robe:			eEquipped = pcUser->eRobeEquipped;			break;
+	case ITEMTYPE_Amulet:		eEquipped = pcUser->eAmuletEquipped;		break;
+	default: return 0;
+	}
+
+	if ( !eEquipped )
+		return 0;
+
+	auto pEquippedDef = ITEMSERVER->FindItemDefByCode( eEquipped );
+	return pEquippedDef ? pEquippedDef->sItem.iLevel : 0;
 }
 
 LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonsterId, User* pcUser )
@@ -850,7 +906,7 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 						ItemDropDefinition* itemDropDef = reinterpret_cast<ItemDropDefinition*>(v);
 						for ( DWORD dwCode : itemDropDef->vItemCodes )
 						{
-							if ( IsItemAcceptableInLootMode( dwCode, iPlayerClass ) )
+							if ( IsItemAcceptableInLootMode( dwCode, iPlayerClass, pcUser ) )
 							{
 								return v; // found a usable item in this group
 							}
@@ -1002,7 +1058,7 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 				int count = itemDropDef->vItemCodes.size();
 				int randomIndex = Dice::RandomI( 0, count - 1 );
 				dwItemCode = itemDropDef->vItemCodes[randomIndex];
-				if ( IsItemAcceptableInLootMode( dwItemCode, (ECharacterClass)iPlayerClass ) )
+				if ( IsItemAcceptableInLootMode( dwItemCode, (ECharacterClass)iPlayerClass, pcUser ) )
 					break;
 			}
 		}
