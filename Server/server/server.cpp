@@ -297,6 +297,8 @@ void Server::UnInit()
 
 void Server::Load()
 {
+	auto t_start = std::chrono::steady_clock::now();
+
 	iGameVersion = SERVERCONFIG->GetVersionGame();
 	iServerVersion = SERVERCONFIG->GetVersionServer();
 
@@ -648,7 +650,9 @@ void Server::Load()
 
 	//LOGERROR ( "TEst error %s", 1 ); //how to catch this? bad format
 
-
+    auto t_end = std::chrono::steady_clock::now();
+    auto t_ms = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+    INFO("Server::Load() completed in %lld ms", t_ms);
 }
 
 void Server::DumpItemsIntoDatabase()
