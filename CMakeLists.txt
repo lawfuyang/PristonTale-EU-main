@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
+
+# Enforce 32-bit (Win32) — required by this project
+set(CMAKE_GENERATOR_PLATFORM "Win32" CACHE STRING "Target platform" FORCE)
+
 project(PristonTale VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR "32-bit required. Use: cmake -B build -A Win32")
-endif()
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_compile_options(/wd4995 /wd4290 /wd4091 /wd4005 /wd4065 /wd4409 /wd4996 /MP)
