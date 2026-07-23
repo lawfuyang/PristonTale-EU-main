@@ -827,8 +827,9 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 						for ( DWORD dwCode : itemDropDef->vItemCodes )
 						{
 							DWORD eItemBase = dwCode & 0xFF000000;
-							// Skip potions in LootMode
-							if ( eItemBase == ITEMBASE_Potion )
+
+							// Skip potions, crystals, and cores in LootMode
+							if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core )
 								continue;
 
 							auto pDef = ITEMSERVER->FindItemDefByCode( dwCode );
