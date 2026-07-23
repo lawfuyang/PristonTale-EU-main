@@ -301,6 +301,15 @@ void User::Init()
 	bLootFilterEnabled = 0;
 	iLootFilterFlags = 0;
 	sEquipmentMinLevel = 0;
+	eArmorEquipped = (EItemID)0;
+	eBootsEquipped = (EItemID)0;
+	eGauntletsEquipped = (EItemID)0;
+	eBraceletEquipped = (EItemID)0;
+	eRingRightEquipped = (EItemID)0;
+	eRingLeftEquipped = (EItemID)0;
+	eOrbEquipped = (EItemID)0;
+	eRobeEquipped = (EItemID)0;
+	eAmuletEquipped = (EItemID)0;
 	bTeasureHuntingMode = FALSE;
 
 

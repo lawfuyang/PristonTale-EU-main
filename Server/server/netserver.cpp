@@ -1431,19 +1431,94 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 		}
 		case PKTHDR_NetPlayerInventory:
 		{
-			PacketNetPlayerInventory * l_InvPacket = reinterpret_cast<PacketNetPlayerInventory*>(pPacket);
-			UserData				 * l_UserData  = USERDATABYID(l_InvPacket->ObjectID);
-			User * pcUser						   = USERDATATOUSER ( l_UserData );
-			if ( l_UserData && pcUser )
+			PacketNetPlayerInventory* l_InvPacket = reinterpret_cast<PacketNetPlayerInventory*>(pPacket);
+			UserData* l_UserData = USERDATABYID(l_InvPacket->ObjectID);
+			User* pcUser = USERDATATOUSER(l_UserData);
+			if (l_UserData && pcUser)
 			{
-				memcpy ( pcUser->sLastInventoryItems, l_UserData->sIntentoryItems, sizeof ( DropItemData ) * 316 ); //store previous inventory state for PKTHDR_ThrowItem
-				memcpy ( l_UserData->sIntentoryItems, l_InvPacket->sIntentoryItems, sizeof ( DropItemData ) * 316 );
-				l_UserData->pcSocketData->u->LastDroppedItemsThrowMapHack.clear ();
+				memcpy(pcUser->sLastInventoryItems, l_UserData->sIntentoryItems, sizeof(DropItemData) * 316); //store previous inventory state for PKTHDR_ThrowItem
+				memcpy(l_UserData->sIntentoryItems, l_InvPacket->sIntentoryItems, sizeof(DropItemData) * 316);
+				l_UserData->pcSocketData->u->LastDroppedItemsThrowMapHack.clear();
+
+				// Track equipped items for LootFilter ilvl comparison
+				// sIntentoryItems is a flat array (NOT slot-ordered) — scan by item type
+				EItemID eWeaponScan = (EItemID)0;
+				EItemID eShieldScan = (EItemID)0;
+				pcUser->eArmorEquipped = (EItemID)0;
+				pcUser->eBootsEquipped = (EItemID)0;
+				pcUser->eGauntletsEquipped = (EItemID)0;
+				pcUser->eBraceletEquipped = (EItemID)0;
+				pcUser->eRingRightEquipped = (EItemID)0;
+				pcUser->eRingLeftEquipped = (EItemID)0;
+				pcUser->eOrbEquipped = (EItemID)0;
+				pcUser->eRobeEquipped = (EItemID)0;
+				pcUser->eAmuletEquipped = (EItemID)0;
+
+				for (int i = 0; i < 316; i++)
+				{
+					DropItemData& item = l_InvPacket->sIntentoryItems[i];
+					if (!item.iItemID)
+						continue;
+
+					auto pDef = ITEMSERVER->FindItemDefByCode(item.iItemID);
+					if (!pDef)
+						continue;
+
+					DWORD eItemType = pDef->sItem.sItemID.ToItemType();
+					DWORD eItemBase = eItemType & 0xFF000000;
+
+					if (eItemBase == ITEMBASE_Weapon && !eWeaponScan)
+						eWeaponScan = (EItemID)item.iItemID;
+					else if (eItemType == ITEMTYPE_Shield && !eShieldScan)
+						eShieldScan = (EItemID)item.iItemID;
+
+					switch (eItemType)
+					{
+					case ITEMTYPE_Armor:		pcUser->eArmorEquipped = (EItemID)item.iItemID; break;
+					case ITEMTYPE_Boots:		pcUser->eBootsEquipped = (EItemID)item.iItemID; break;
+					case ITEMTYPE_Gauntlets:	pcUser->eGauntletsEquipped = (EItemID)item.iItemID; break;
+					case ITEMTYPE_Bracelets:	pcUser->eBraceletEquipped = (EItemID)item.iItemID; break;
+					case ITEMTYPE_Orb:			pcUser->eOrbEquipped = (EItemID)item.iItemID; break;
+					case ITEMTYPE_Robe:			pcUser->eRobeEquipped = (EItemID)item.iItemID; break;
+					case ITEMTYPE_Amulet:		pcUser->eAmuletEquipped = (EItemID)item.iItemID; break;
+					case ITEMTYPE_Ring:
+					case ITEMTYPE_Ring2:
+						// Equipped rings come first in the array; Right then Left
+						if (!pcUser->eRingRightEquipped)
+							pcUser->eRingRightEquipped = (EItemID)item.iItemID;
+						else if (!pcUser->eRingLeftEquipped)
+							pcUser->eRingLeftEquipped = (EItemID)item.iItemID;
+						break;
+					default: break;
+					}
+				}
+
+				// Log equipped items for confirmation
+				auto LogEquip = [](const char* slot, EItemID id) {
+					if (id)
+					{
+						auto pDef = ITEMSERVER->FindItemDefByCode(id);
+						if (pDef)
+							INFO("  [%s] %s (ilvl %d)", slot, pDef->sItem.szItemName, pDef->sItem.iLevel);
+					}
+				};
+				INFO("Equipped items for %s:", l_UserData->szCharacterName);
+				LogEquip("Weapon", eWeaponScan);
+				LogEquip("Shield", eShieldScan);
+				LogEquip("Armor",  pcUser->eArmorEquipped);
+				LogEquip("Boots",  pcUser->eBootsEquipped);
+				LogEquip("Gaunt",  pcUser->eGauntletsEquipped);
+				LogEquip("Brace",  pcUser->eBraceletEquipped);
+				LogEquip("Ring R", pcUser->eRingRightEquipped);
+				LogEquip("Ring L", pcUser->eRingLeftEquipped);
+				LogEquip("Orb",    pcUser->eOrbEquipped);
+				LogEquip("Robe",   pcUser->eRobeEquipped);
+				LogEquip("Amulet", pcUser->eAmuletEquipped);
 			}
 			else
 			{
-				if (LOGIN_SERVER )
-					WARN ( "PKTHDR_NetPlayerInventory USER NOT FOUND" );
+				if (LOGIN_SERVER)
+					WARN("PKTHDR_NetPlayerInventory USER NOT FOUND");
 			}
 
 			break;

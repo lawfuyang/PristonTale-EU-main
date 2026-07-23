@@ -702,6 +702,17 @@ public:
 	int										iLootFilterFlags;
 	short									sEquipmentMinLevel;
 
+	// Equipped item tracking for LootFilter ilvl comparison
+	EItemID									eArmorEquipped;
+	EItemID									eBootsEquipped;
+	EItemID									eGauntletsEquipped;
+	EItemID									eBraceletEquipped;
+	EItemID									eRingRightEquipped;
+	EItemID									eRingLeftEquipped;
+	EItemID									eOrbEquipped;
+	EItemID									eRobeEquipped;
+	EItemID									eAmuletEquipped;
+
 	DropItemData							LastDroppedItem;
 
 	BOOL									bTeasureHuntingMode;
