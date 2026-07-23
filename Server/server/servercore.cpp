@@ -229,6 +229,26 @@ void ServerCore::LoadDirty()
 		INFO( "Event> No Break Aging enabled" );
 	}
 
+	//Skill MP cost percent (100 = normal, 50 = half cost, 0 = free)
+	SKILL_MP_COST_PERCENT = cReader.ReadInt("Event", "SkillMPCostPercent");
+	if (SKILL_MP_COST_PERCENT <= 0) SKILL_MP_COST_PERCENT = 100;
+	INFO("Event> Skill MP Cost: %d%%", SKILL_MP_COST_PERCENT);
+
+	//Skill SP (Stamina) cost percent
+	SKILL_SP_COST_PERCENT = cReader.ReadInt("Event", "SkillSPCostPercent");
+	if (SKILL_SP_COST_PERCENT <= 0) SKILL_SP_COST_PERCENT = 100;
+	INFO("Event> Skill SP Cost: %d%%", SKILL_SP_COST_PERCENT);
+
+	//Always aging success (never fail, never break)
+	ALWAYS_AGING_SUCCESS = cReader.ReadOnOff("Event", "AlwaysAgingSuccess");
+	if (ALWAYS_AGING_SUCCESS)
+		INFO("Event> Always Aging Success: ON (never fail, never break)");
+
+
+	//Loot mode: 0=normal, 1=cheat (no gold, always perfect, class match, always spec)
+	LOOT_MODE = cReader.ReadInt("Event", "LootMode");
+	if (LOOT_MODE) INFO("Event> Loot Mode: CHEAT (no gold, perfect, class match, spec)");
+
 	//Aging no break  event
 	if (cReader.ReadOnOff("Event", "AgingHalfPrice"))
 	{

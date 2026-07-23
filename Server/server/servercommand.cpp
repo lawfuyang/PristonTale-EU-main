@@ -1044,6 +1044,33 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 		}
 	}
 
+	else if ( COMMAND( "/finishquest", pszBuff ) )
+	{
+		if ( GetParameterString( pszBuff, 1, szCommandParam1 ) )
+		{
+			int iQuestID = atoi( szCommandParam1 );
+			if ( iQuestID > 0 )
+			{
+				if ( QUESTSERVER->SQLFinishQuest( pcUser, iQuestID ) )
+					CHATSERVER->SendChatEx( pcUser, CHATCOLOR_Error, "> Quest %d completed!", iQuestID );
+				else
+					CHATSERVER->SendChatEx( pcUser, CHATCOLOR_Error, "> Failed to complete quest %d", iQuestID );
+			}
+		}
+		return TRUE;
+	}
+
+	else if ( COMMAND( "/activequests", pszBuff ) )
+	{
+		std::vector<int> vQuests = QUESTSERVER->SQLGetActiveQuestsID( pcUser );
+		if ( vQuests.empty() )
+			CHATSERVER->SendChatEx( pcUser, CHATCOLOR_Error, "> No active quests." );
+		else
+			for ( int id : vQuests )
+				CHATSERVER->SendChatEx( pcUser, CHATCOLOR_Error, "> Active Quest ID: %d", id );
+		return TRUE;
+	}
+
 	//override the EXE one
 	else if (COMMAND ( "/getitem", pszBuff) ||
 			 COMMAND ( "/getitemold", pszBuff ) )
@@ -1282,6 +1309,26 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 			int l_Gold = atoi(szCommandParam1);
 			CHARACTERSERVER->GiveGOLD(pcUser, l_Gold, WHEREID_GiveMoney);
 			CHATSERVER->SendChat(pcUser, CHATCOLOR_Error, "> Done!");
+		}
+		return TRUE;
+	}
+	if (iLen = COMMAND("/GetCoins", pszBuff))
+	{
+		if (GetParameterString(pszBuff, 1, szCommandParam1))
+		{
+			int iCoins = atoi(szCommandParam1);
+			SQLConnection * pcDB = SQLCONNECTION(DATABASEID_UserDB_PrimaryServer);
+			if (pcDB->Open())
+			{
+				if (pcDB->Prepare("UPDATE UserInfo SET Coins=Coins+? WHERE AccountName=?"))
+				{
+					pcDB->BindParameterInput(1, PARAMTYPE_Integer, &iCoins);
+					pcDB->BindParameterInput(2, PARAMTYPE_String, pcUserData->szAccountName, 32);
+					pcDB->ExecuteUpdate();
+				}
+				pcDB->Close();
+			}
+			CHATSERVER->SendChatEx(pcUser, CHATCOLOR_Error, "> Added %d Coins to your account!", iCoins);
 		}
 		return TRUE;
 	}

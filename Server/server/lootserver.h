@@ -59,7 +59,14 @@ private:
 
 
 
-	BaseDropDefinition *	GetRandomDropDefinition(int iMonsterDropId);
+	BaseDropDefinition *	GetRandomDropDefinition(int iMonsterDropId, User* pcUser = nullptr);
+
+	/// <summary>
+	/// In LOOT_MODE, weapons are strictly filtered to the "signature" weapon type
+	/// for each class (e.g. Pikeman → Scythe only, Fighter → Sword/Axe).
+	/// Non-weapon items are always accepted (class filtering is done elsewhere).
+	/// </summary>
+	static bool				IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iClass );
 
 	std::map<int, MonsterDropTable>				      mDropTable;
 	std::mutex										  mDropTableMutex;

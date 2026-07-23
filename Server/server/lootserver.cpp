@@ -714,11 +714,81 @@ BOOL LootServer::DropDefinitionExistsForMonsterID( int iMonsterID )
 	return mDropTable.find( iMonsterID ) != mDropTable.end();
 }
 
-LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonsterId )
+// ------------------------------------------------------------------
+// LOOT_MODE: Strict weapon→class signature mapping.
+// Weapons are filtered to the signature type for each class.
+// Armor/Robes are filtered: casters (Magician/Priestess/Shaman) → Robes,
+// all other classes → Armor.
+// Non-weapon, non-armor/robe items return true (no restriction).
+// ------------------------------------------------------------------
+bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iClass )
+{
+	DWORD eItemBase = dwItemCode & 0xFF000000;
+	DWORD eItemType = dwItemCode & 0xFFFF0000;
+
+	// ---- Weapons ----
+	if ( eItemBase == ITEMBASE_Weapon )
+	{
+		switch ( iClass )
+		{
+		case CHARACTERCLASS_Fighter:
+			return ( eItemType == ITEMTYPE_Axe || eItemType == ITEMTYPE_Sword );
+
+		case CHARACTERCLASS_Mechanician:
+			return ( eItemType == ITEMTYPE_Claw || eItemType == ITEMTYPE_Hammer || eItemType == ITEMTYPE_Shield );
+
+		case CHARACTERCLASS_Archer:
+			return ( eItemType == ITEMTYPE_Bow );
+
+		case CHARACTERCLASS_Atalanta:
+			return ( eItemType == ITEMTYPE_Javelin || eItemType == ITEMTYPE_Shield );
+
+		case CHARACTERCLASS_Pikeman:
+			return ( eItemType == ITEMTYPE_Scythe );
+
+		case CHARACTERCLASS_Knight:
+			return ( eItemType == ITEMTYPE_Sword );
+
+		case CHARACTERCLASS_Magician:
+		case CHARACTERCLASS_Priestess:
+			return ( eItemType == ITEMTYPE_Wand );
+
+		case CHARACTERCLASS_Assassin:
+			return ( eItemType == ITEMTYPE_Dagger );
+
+		case CHARACTERCLASS_Shaman:
+			return ( eItemType == ITEMTYPE_Phantom );
+
+		default:
+			return true;
+		}
+	}
+
+	// ---- Armor vs Robes ----
+	if ( eItemType == ITEMTYPE_Armor || eItemType == ITEMTYPE_Robe )
+	{
+		switch ( iClass )
+		{
+		case CHARACTERCLASS_Magician:
+		case CHARACTERCLASS_Priestess:
+		case CHARACTERCLASS_Shaman:
+			return ( eItemType == ITEMTYPE_Robe );
+
+		default:
+			return ( eItemType == ITEMTYPE_Armor );
+		}
+	}
+
+	return true; // boots, gauntlets, shields, etc. — no restriction
+}
+
+LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonsterId, User* pcUser )
 {
 	//Only for game-server
 	if ( LOGIN_SERVER )
 		return nullptr;
+
+	std::lock_guard<std::mutex> guard(mDropTableMutex);
 
 	auto it = mDropTable.find( iMonsterId );
 	if ( it == mDropTable.end() )
@@ -729,6 +799,60 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 
 	MonsterDropTable * monsterDropTable = &mDropTable[iMonsterId];
 
+	const int kMaxRetries = 100;
+	// LOOT_MODE: filter gold/non-class drops at the definition level.
+	// Retry up to kMaxRetries times to find a suitable drop definition.
+	if ( LOOT_MODE && pcUser )
+	{
+		ECharacterClass iPlayerClass = pcUser->pcUserData->sCharacterData.iClass;
+
+		for ( int iRetry = 0; iRetry < kMaxRetries; iRetry++ )
+		{
+			int iRand = Dice::RandomI( 0, monsterDropTable->iTotalDropChance );
+			int iTotal = 0;
+
+			for ( BaseDropDefinition * v : monsterDropTable->vDropDefinitions )
+			{
+				iTotal += v->iDropChance;
+				if ( iRand <= iTotal )
+				{
+					// Skip gold & air entirely
+					if ( v->eDropType == DROPTYPE_GOLD || v->eDropType == DROPTYPE_AIR )
+						continue;
+
+					// Item group: check if at least one item is usable by this class
+					if ( v->eDropType == DROPTYPE_ITEMS )
+					{
+						ItemDropDefinition* itemDropDef = reinterpret_cast<ItemDropDefinition*>(v);
+						for ( DWORD dwCode : itemDropDef->vItemCodes )
+						{
+							DWORD eItemBase = dwCode & 0xFF000000;
+							// Skip potions in LootMode
+							if ( eItemBase == ITEMBASE_Potion )
+								continue;
+
+							auto pDef = ITEMSERVER->FindItemDefByCode( dwCode );
+							if ( pDef && (pDef->JobBitCodeRandomCount == 0 ||
+							              (ITEMSERVER->CharacterClassCanUseItem( iPlayerClass, pDef ) &&
+							               LootServer::IsItemAcceptableForClass( dwCode, iPlayerClass ))) )
+							{
+								return v; // found a usable item in this group
+							}
+						}
+						// No usable items in this group — retry
+						continue;
+					}
+
+					return v;
+				}
+			}
+		}
+
+		// just return nothing to not pollute the ground
+		return nullptr;
+	}
+
+	// Default: pure random without filtering
 	int iRand = Dice::RandomI( 0, monsterDropTable->iTotalDropChance );
 	int iTotal = 0;
 
@@ -736,10 +860,16 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 	{
 		iTotal += v->iDropChance;
 		if ( iRand <= iTotal )
+		{
+			// In LOOT_MODE fallthrough, skip gold if possible
+			if ( LOOT_MODE && pcUser && v->eDropType == DROPTYPE_GOLD )
+				continue;
+
 			return v;
+		}
 	}
 
-	return new AirDropDefinition();
+	return nullptr;
 }
 
 BOOL LootServer::SendQuestDropItemToUser( UnitData * pcUnitData, User * pcUser )
@@ -786,13 +916,11 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 	if ( EVENTSERVER->IsEventMimicMonster( pcUnitData ) )
 		eItemSource = EItemSource::MimicKill;
 
-	std::unique_lock<std::mutex> guard(mDropTableMutex);
-
 	//no drops in BC
 	if ( pcUnitData->pcMap->pcBaseMap->iMapID == MAPID_BlessCastle )
 		return FALSE;
 
-	BaseDropDefinition* baseDropDefinition = GetRandomDropDefinition(iMonsterDropId);
+	BaseDropDefinition* baseDropDefinition = GetRandomDropDefinition(iMonsterDropId, pcUser);
 
 	//monster id not found
 	if (baseDropDefinition == nullptr)
@@ -818,8 +946,6 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 
 		int iGold = Dice::RandomI(goldDropDef->iGoldMin, goldDropDef->iGoldMax);
 
-
-
 		if (pcUser && pcUser->sBellatraSoloCrown > 0)
 		{
 			if (pcUser->sBellatraSoloCrown == 1 || pcUser->sBellatraSoloCrown == 4) //4 = 1st place with humor
@@ -837,9 +963,6 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 		}
 
 		psItem->iGold = iGold;
-
-		//no longer need the lock now.
-		guard.unlock();
 
 		STRINGCOPY(psItem->szItemName, FormatString("%d Gold", iGold));
 		ITEMSERVER->ReformItem(psItem);
@@ -859,61 +982,50 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 		//pick item code from group
 		DWORD dwItemCode = itemDropDef->vItemCodes[randomIndex];
 
-		//no longer need the lock now.
-		guard.unlock();
-
 		auto pDefItem = ITEMSERVER->FindItemDefByCode(dwItemCode);
 
 		if (pDefItem && (pDefItem->sItem.iItemUniqueID == FALSE))
 		{
-			DWORD eItemBase = dwItemCode & 0xFF000000;
-			DWORD eItemType = dwItemCode & 0xFFFF0000;
-
-			//if spec = 0
-			//Test result = 60% chance to get spec, or 40% chance to get spec
 			int iSpec = 0;
+			int iPlayerClass = (pcUser && LOOT_MODE) ? pcUser->pcUserData->sCharacterData.iClass : 0;
 
-			//Note, ideally the chance of getting a spec
-			//from a monster drop should be higher than a Jera,
-			//and there is more chance of finding a spec item in lower level maps.
-
-			if ((eItemType == ITEMTYPE_Armor || eItemType == ITEMTYPE_Boots || eItemType == ITEMTYPE_Gauntlets || eItemType == ITEMTYPE_Shield || eItemType == ITEMTYPE_Robe) ||
-				(eItemBase == ITEMBASE_Weapon) ||
-				(eItemType == ITEMTYPE_Bracelets || eItemType == ITEMTYPE_Orb || eItemType == ITEMTYPE_Ring || eItemType == ITEMTYPE_Ring2))
+			if (LOOT_MODE && pcUser)
 			{
-				if (pDefItem->sItem.iLevel < 40)
+				iSpec = 100;
+			}
+			else
+			{
+				DWORD eItemBase = dwItemCode & 0xFF000000;
+				DWORD eItemType = dwItemCode & 0xFFFF0000;
+
+				if ((eItemType == ITEMTYPE_Armor || eItemType == ITEMTYPE_Boots || eItemType == ITEMTYPE_Gauntlets || eItemType == ITEMTYPE_Shield || eItemType == ITEMTYPE_Robe) ||
+					(eItemBase == ITEMBASE_Weapon) ||
+					(eItemType == ITEMTYPE_Bracelets || eItemType == ITEMTYPE_Orb || eItemType == ITEMTYPE_Ring || eItemType == ITEMTYPE_Ring2))
 				{
-					//test reuslt = 70% chance to get spec
-					if (Dice::RandomI(0, 99) < 50)
+					if (pDefItem->sItem.iLevel < 40)
 					{
-						iSpec = 100;
+						if (Dice::RandomI(0, 99) < 50) iSpec = 100;
 					}
-				}
-				else if (pDefItem->sItem.iLevel < 80)
-				{
-					//test result = 63% chance to get spec
-					if (Dice::RandomI(0, 99) < 40)
+					else if (pDefItem->sItem.iLevel < 80)
 					{
-						iSpec = 100;
+						if (Dice::RandomI(0, 99) < 40) iSpec = 100;
 					}
-				}
-				else if (pDefItem->sItem.iLevel < 100)
-				{
-					//test result = 58% chance to get spec
-					if (Dice::RandomI(0, 99) < 30)
+					else if (pDefItem->sItem.iLevel < 100)
 					{
-						iSpec = 100;
+						if (Dice::RandomI(0, 99) < 30) iSpec = 100;
 					}
-				}
-				else if (pDefItem->sItem.iLevel >= 100)
-				{
-					//test result = 40% chance to get spec
 				}
 			}
 
-			ITEMSERVER->CreateItem( psItem, pDefItem, eItemSource );
-
-			//std::cout << "ITEM loot dropped: " << psItem->szItemName << std::endl;
+			if (LOOT_MODE && pcUser)
+			{
+				ITEMSERVER->CreatePerfectItem(psItem, pDefItem, eItemSource, iPlayerClass);
+				ITEMSERVER->ReformItem(psItem);
+			}
+			else
+			{
+				ITEMSERVER->CreateItem(psItem, pDefItem, eItemSource, iPlayerClass, iSpec);
+			}
 		}
 
 		return TRUE;

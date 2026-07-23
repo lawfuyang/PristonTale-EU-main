@@ -940,6 +940,13 @@ void AddToSkillInfoContainer ( PacketSkillInfoContainer * spContainer, enum ECha
 					pcDB->GetData ( col++, PARAMTYPE_Short, &sSkillInfo->sSkillUseStaminaBase );
 					pcDB->GetData ( col++, PARAMTYPE_Short, &sSkillInfo->sSkillUseStaminaPerLevel );
 
+					// Apply SkillSPCostPercent multiplier from server.ini
+					if ( SKILL_SP_COST_PERCENT != 100 )
+					{
+						sSkillInfo->sSkillUseStaminaBase    = (short)(sSkillInfo->sSkillUseStaminaBase    * (SKILL_SP_COST_PERCENT / 100.0f));
+						sSkillInfo->sSkillUseStaminaPerLevel = (short)(sSkillInfo->sSkillUseStaminaPerLevel * (SKILL_SP_COST_PERCENT / 100.0f));
+					}
+
 					pcDB->GetData ( col++, PARAMTYPE_Integer, &sSkillInfo->iaItemAllowedType[0]);
 					pcDB->GetData ( col++, PARAMTYPE_Integer, &sSkillInfo->iaItemAllowedType[1]);
 					pcDB->GetData ( col++, PARAMTYPE_Integer, &sSkillInfo->iaItemAllowedType[2]);
@@ -1382,6 +1389,13 @@ void AppendIntValuesToServerSkillDataBuffer ( PacketSkillDataContainer * contain
 
 		if ( SQLSKILL->GetSkillValueIntArray ( eSkillID, columnName, values, bIgnoreWarning ) )
 		{
+			// Apply skill MP/SP cost multiplier from server.ini
+			if (columnName == "MPCost" && SKILL_MP_COST_PERCENT != 100)
+			{
+				for (int i = 0; i < 10; i++)
+					values[i] = (int)(values[i] * (SKILL_MP_COST_PERCENT / 100.0f));
+			}
+
 			SkillArrayData arrayData;
 			arrayData.dwSkillArrayAddressOrIndex = dwAddressOrIndex;
 			arrayData.iSkillID = (int)eSkillID;

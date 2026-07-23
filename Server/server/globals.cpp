@@ -26,7 +26,11 @@ int								iBlessCastleMode;
 BOOL							bAgingFreeEvent;
 BOOL							bAgingNoBreakEvent;
 BOOL							bAgingHalfPriceEvent;
+int								SKILL_MP_COST_PERCENT	= 100;
+int								SKILL_SP_COST_PERCENT	= 100;
+BOOL							ALWAYS_AGING_SUCCESS	= FALSE;
 
+int								LOOT_MODE				= 0;
 //FURY ARENA
 BOOL							bFuryArenaEnabled;
 

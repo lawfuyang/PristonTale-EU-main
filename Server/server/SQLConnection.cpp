@@ -218,7 +218,7 @@ void SQLConnection::Init( EDatabaseID eDatabaseID, std::string configPrefix )
 		if ( szPasswrd.empty() )
 			szPasswrd = pcReader->ReadString( "Database", "Password" );
 
-		STRINGFORMAT( szStringConnectionSQL, "Persist Security Info=False; Integrated Security=False; Driver=%s; Server=%s; Database=%s; Uid=%s; Pwd=%s;",
+		STRINGFORMAT( szStringConnectionSQL, "Persist Security Info=False; Integrated Security=False; TrustServerCertificate=Yes; Driver=%s; Server=%s; Database=%s; Uid=%s; Pwd=%s;",
 			pcReader->ReadString( "Database", "Driver" ).c_str(), szHost.c_str(), szDatabaseName, szUser.c_str(), szPasswrd.c_str() );
 	}
 

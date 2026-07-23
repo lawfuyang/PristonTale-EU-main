@@ -151,6 +151,8 @@ BOOL PacketServer::AnalyzePacket( User * pcUser, PacketReceiving * p )
 			if ( pcUserData->dwNoticeCounter < READDWORD( 0x07AC9BF0 ) )
 				CALL_WITH_ARG1( 0x00550930, (DWORD)pcUserData );
 			//printf("Cheat engine %u %s\n", ((PacketPing*)psPacket)->CheatEngineDetected, pcUserData->szCharacterName);
+			// ALL CHEAT DETECTION DISABLED for local offline play
+			#if 0
 			if (LOGIN_SERVER && ((PacketPing *)psPacket)->CheatEngineDetected && strlen(pcUserData->szCharacterName) > 0)
 			{
 				//printf("Try ban\n");
@@ -164,6 +166,7 @@ BOOL PacketServer::AnalyzePacket( User * pcUser, PacketReceiving * p )
 					LOGSERVER->OnLogCheat(pcUserBanned, &sPacket);
 				}
 			}
+			#endif
 
 			break;
 

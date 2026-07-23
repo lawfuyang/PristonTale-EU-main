@@ -2580,8 +2580,19 @@ int ItemServer::GetAgingType( UserData * pcUserData )
 			iFailChance = iFailAgeStoneChance; // change to new chance
 		}
 
-		AgingResultType eAgingResultType = GetAgingResultType ( iAgingLevel, *(int *)0x789066C,
+		AgingResultType eAgingResultType;
+
+		// Always aging success: never fail, never break, always +2
+		if (ALWAYS_AGING_SUCCESS)
+		{
+			// 85% chance +1, 15% chance +2
+			eAgingResultType = AgingResultType::PlusTwo;
+		}
+		else
+		{
+			eAgingResultType = GetAgingResultType ( iAgingLevel, *(int *)0x789066C,
 				iFailChance, iPlus2Chance, iMinus1Chance, iMinus2Chance, iBreakChance, EVENT_AGING_NOBREAK );
+		}
 
 		SQLLogAgingResult ( pcUser, eAgingResultType, iAgingLevel );
 

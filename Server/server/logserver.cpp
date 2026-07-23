@@ -196,6 +196,9 @@ void LogServer::OnServerLog ( std::string message, EServerLogType plogType )
 
 BOOL LogServer::OnLogCheat( UserData * pcUserData, void * pCheatLog, BOOL bDisconnect, BOOL bBan )
 {
+	// ALL CHEAT DETECTION DISABLED for local offline play
+	return TRUE;
+#if 0
 	if (pcUserData)
 	{
 		char szCheatLog[512] = { 0 };
@@ -785,6 +788,7 @@ BOOL LogServer::OnLogCheat( UserData * pcUserData, void * pCheatLog, BOOL bDisco
 
 	}
 	return TRUE;
+#endif
 }
 
 void LogServer::OnLogAging( UserData * pcUserData, int iLogID, const char * pszLog )

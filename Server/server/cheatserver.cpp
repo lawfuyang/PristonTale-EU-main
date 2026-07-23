@@ -107,6 +107,9 @@ void CheatServer::OnLoginUserPacket( UserData * pcUserData )
 
 void CheatServer::CheckStatePoint( UserData * pcUserData, DWORD dwLevelQuestLog )
 {
+	// ALL CHEAT DETECTION DISABLED for local offline play
+	return;
+#if 0
 	if ( pcUserData && pcUserData->iGameLevel == GAMELEVEL_None )
 	{
 		typedef BOOL( __cdecl *t_CheckStateCharacter )(CharacterData * pcUserData, DWORD dwLevelQuestLog);
@@ -118,6 +121,7 @@ void CheatServer::CheckStatePoint( UserData * pcUserData, DWORD dwLevelQuestLog 
 			DisconnectUser( pcUserData, TRUE );
 		}
 	}
+#endif
 }
 
 BOOL CheatServer::OnCheckMacAddress( const char * pszUserID, const char * pszMacAddr )

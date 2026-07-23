@@ -78,7 +78,7 @@ void SQLAPI::Init( const char * DB )
 	std::string pszUser = cReader.ReadString( "Database", "User" );
 	std::string pszPass = cReader.ReadString( "Database", "Password" );
 	std::string pszServer = cReader.ReadString( "Database", "Host" );
-	wsprintfA( szStringConnectionSQL, "Driver=%s; Server=%s; Database=%s; Uid=%s; Pwd=%s;", pszDriver.c_str(), pszServer.c_str(), DB, pszUser.c_str(), pszPass.c_str() );
+	wsprintfA( szStringConnectionSQL, "TrustServerCertificate=Yes; Driver=%s; Server=%s; Database=%s; Uid=%s; Pwd=%s;", pszDriver.c_str(), pszServer.c_str(), DB, pszUser.c_str(), pszPass.c_str() );
 
 	memcpy( strconn, szStringConnectionSQL, 512 );
 
