@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Login Server",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Files/Server/login-server/Server.exe",
+            "cwd": "${workspaceFolder}/Files/Server/login-server",
+            "args": [],
+            "environment": [],
+            "console": "integratedTerminal",
+            "symbolSearchPath": "${workspaceFolder}/Files/Server/login-server;${workspaceFolder}/build/bin/Server/Debug"
+        },
+        {
+            "name": "Game Server",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Files/Server/game-server/Server.exe",
+            "cwd": "${workspaceFolder}/Files/Server/game-server",
+            "args": [],
+            "environment": [],
+            "console": "integratedTerminal",
+            "symbolSearchPath": "${workspaceFolder}/Files/Server/game-server;${workspaceFolder}/build/bin/Server/Debug"
+        },
+        {
+            "name": "Game Client",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Files/Game/Game.exe",
+            "cwd": "${workspaceFolder}/Files/Game",
+            "args": [],
+            "environment": [],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "All (Login + Game Server + Client)",
+            "configurations": [
+                "Login Server",
+                "Game Server",
+                "Game Client"
+            ],
+            "stopOnEntry": false,
+            "preLaunchTask": "Ensure Docker SQL Running"
+        },
+        {
+            "name": "Servers Only (Login + Game)",
+            "configurations": [
+                "Login Server",
+                "Game Server"
+            ],
+            "stopOnEntry": false,
+            "preLaunchTask": "Ensure Docker SQL Running"
+        }
+    ]
+}

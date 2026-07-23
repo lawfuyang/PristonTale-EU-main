@@ -25,9 +25,6 @@ bld/
 # Visual Studio 2015/2017/2019 cache/options directory
 .vs/
 
-# VS Code settings
-.vscode/
-
 # MSBuild intermediate output folders
 Server/server/GameServer/
 Server/server/Login/
