@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_compile_options(/wd4995 /wd4290 /wd4091 /wd4005 /wd4065 /wd4409 /wd4996 /MP)
+add_link_options(/MACHINE:X86)
 
 set(SHARED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shared")
 
