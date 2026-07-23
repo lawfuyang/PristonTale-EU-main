@@ -67,6 +67,7 @@ private:
 	/// Non-weapon items are always accepted (class filtering is done elsewhere).
 	/// </summary>
 	static bool				IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iClass );
+	static bool				IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass iClass );
 
 	std::map<int, MonsterDropTable>				      mDropTable;
 	std::mutex										  mDropTableMutex;

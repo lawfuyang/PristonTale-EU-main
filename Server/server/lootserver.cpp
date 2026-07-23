@@ -782,6 +782,28 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 	return true; // boots, gauntlets, shields, etc. — no restriction
 }
 
+// LOOT_MODE: Returns true if the item is acceptable — not a potion/crystal/core,
+// and either has no class restriction (JobBitCodeRandomCount == 0) or is
+// class-usable and passes the strict weapon/armor signature check.
+bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass iClass )
+{
+	DWORD eItemBase = dwItemCode & 0xFF000000;
+
+	// Skip potions, crystals, and cores in LootMode
+	if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core )
+		return false;
+
+	auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
+	if ( !pDef )
+		return false;
+
+	if ( pDef->JobBitCodeRandomCount == 0 )
+		return true;
+
+	return ITEMSERVER->CharacterClassCanUseItem( iClass, pDef ) &&
+	       LootServer::IsItemAcceptableForClass( dwItemCode, iClass );
+}
+
 LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonsterId, User* pcUser )
 {
 	//Only for game-server
@@ -818,7 +840,9 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 				{
 					// Skip gold & air entirely
 					if ( v->eDropType == DROPTYPE_GOLD || v->eDropType == DROPTYPE_AIR )
-						continue;
+					{
+						break;
+					}
 
 					// Item group: check if at least one item is usable by this class
 					if ( v->eDropType == DROPTYPE_ITEMS )
@@ -826,28 +850,22 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 						ItemDropDefinition* itemDropDef = reinterpret_cast<ItemDropDefinition*>(v);
 						for ( DWORD dwCode : itemDropDef->vItemCodes )
 						{
-							DWORD eItemBase = dwCode & 0xFF000000;
-
-							// Skip potions, crystals, and cores in LootMode
-							if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core )
-								continue;
-
-							auto pDef = ITEMSERVER->FindItemDefByCode( dwCode );
-							if ( pDef && (pDef->JobBitCodeRandomCount == 0 ||
-							              (ITEMSERVER->CharacterClassCanUseItem( iPlayerClass, pDef ) &&
-							               LootServer::IsItemAcceptableForClass( dwCode, iPlayerClass ))) )
+							if ( IsItemAcceptableInLootMode( dwCode, iPlayerClass ) )
 							{
 								return v; // found a usable item in this group
 							}
 						}
+
 						// No usable items in this group — retry
-						continue;
+						break;
 					}
 
-					return v;
+					break; // Non-item drop (shouldn't happen in LOOT_MODE), retry
 				}
 			}
 		}
+
+		INFO( "GetRandomDropDefinition: No suitable drop found for monster in LOOT_MODE" );
 
 		// just return nothing to not pollute the ground
 		return nullptr;
@@ -862,10 +880,6 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 		iTotal += v->iDropChance;
 		if ( iRand <= iTotal )
 		{
-			// In LOOT_MODE fallthrough, skip gold if possible
-			if ( LOOT_MODE && pcUser && v->eDropType == DROPTYPE_GOLD )
-				continue;
-
 			return v;
 		}
 	}
@@ -977,11 +991,27 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 	{
 		ItemDropDefinition* itemDropDef = (ItemDropDefinition*)baseDropDefinition;
 
-		int count = itemDropDef->vItemCodes.size();
-		int randomIndex = Dice::RandomI(0, count - 1);
-
-		//pick item code from group
-		DWORD dwItemCode = itemDropDef->vItemCodes[randomIndex];
+		// In LOOT_MODE, retry until we land on an acceptable item (not potion/crystal/core)
+		DWORD dwItemCode = 0;
+		if ( LOOT_MODE && pcUser )
+		{
+			int iPlayerClass = pcUser->pcUserData->sCharacterData.iClass;
+			const int kMaxItemRetries = 100;
+			for ( int iRetry = 0; iRetry < kMaxItemRetries; iRetry++ )
+			{
+				int count = itemDropDef->vItemCodes.size();
+				int randomIndex = Dice::RandomI( 0, count - 1 );
+				dwItemCode = itemDropDef->vItemCodes[randomIndex];
+				if ( IsItemAcceptableInLootMode( dwItemCode, (ECharacterClass)iPlayerClass ) )
+					break;
+			}
+		}
+		else
+		{
+			int count = itemDropDef->vItemCodes.size();
+			int randomIndex = Dice::RandomI( 0, count - 1 );
+			dwItemCode = itemDropDef->vItemCodes[randomIndex];
+		}
 
 		auto pDefItem = ITEMSERVER->FindItemDefByCode(dwItemCode);
 
