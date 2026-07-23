@@ -34,22 +34,34 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "All (Login + Game Server + Client)",
-            "configurations": [
-                "Login Server",
-                "Game Server",
-                "Game Client"
+            "name": "▶ Run All (Login + Game Server + Client)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-NoLogo",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/launch-all.ps1"
             ],
-            "stopOnEntry": false,
+            "environment": [],
+            "console": "integratedTerminal",
             "preLaunchTask": "Ensure Docker SQL Running"
         },
         {
-            "name": "Servers Only (Login + Game)",
-            "configurations": [
-                "Login Server",
-                "Game Server"
+            "name": "▶ Run Servers Only (Login + Game)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-NoLogo",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/launch-all.ps1",
+                "-SkipClient"
             ],
-            "stopOnEntry": false,
+            "environment": [],
+            "console": "integratedTerminal",
             "preLaunchTask": "Ensure Docker SQL Running"
         }
     ]
