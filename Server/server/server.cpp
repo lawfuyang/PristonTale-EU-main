@@ -435,130 +435,7 @@ void Server::Load()
 	ITEMSERVER->GetItemSpecMod();
 	ITEMSERVER->GetBaselineMod();
 
-	MIXHANDLER->TestJeraRespec(17108992);	//Mystic Spear (75)
-	MIXHANDLER->TestJeraRespec(17246976);	//Tirbing Sword (108)
-
-	MIXHANDLER->TestJeraRespec(33626368);	//Highlander Armor (105)
-	MIXHANDLER->TestJeraRespec(33624832);	//Doom Armour (85)
-	MIXHANDLER->TestJeraRespec(33624064);	//Extreme Armour (70)
-	MIXHANDLER->TestJeraRespec(33621504);	//Rounded Armor (22)
-
-
-
-
-#if defined (GENERATE_DROP_STATS_IN_DEV_MODE) || !defined (DEV_MODE)
-
-	LOOTSERVER->GenerateDropStats ( "Valento", "Ice2_90", 1000 ); //Valento
-	LOOTSERVER->GenerateDropStats ( "Mokovian", "LT_100", 1000 ); //Mokovian
-	LOOTSERVER->GenerateDropStats ( "Kelvezu", "KL_90", 1000 );   //Kelvezu
-	LOOTSERVER->GenerateDropStats ( "Draxos", "SL_108", 1000 );   //Kelvezu
-
-	////LoC
-	LOOTSERVER->GenerateDropStats( "Fire Worm","LoC_95"); //Fire Worm
-	LOOTSERVER->GenerateDropStats("Chimera","LoC_95"); //Chimera
-	LOOTSERVER->GenerateDropStats("Hell Hound","LoC_95"); //Hell Hound
-	LOOTSERVER->GenerateDropStats("Dark Mage","LoC_95"); //Dark Mage
-	LOOTSERVER->GenerateDropStats("Dark Phalanx","LoC_95"); //Dark Phalanx
-	LOOTSERVER->GenerateDropStats("Bloody Knight","LoC_95"); //Bloody Knight
-	LOOTSERVER->GenerateDropStats("Dark Guard","LoC_95"); //Dark Guard
-
-	////LT
-	LOOTSERVER->GenerateDropStats("Ruca", "LT_100"); //Ruca
-	LOOTSERVER->GenerateDropStats("Naz Senior", "LT_100"); //Naz Senior
-	LOOTSERVER->GenerateDropStats("Kakoa", "LT_100"); //Kakoa
-	LOOTSERVER->GenerateDropStats("Igolation", "LT_100"); //Igolation
-	LOOTSERVER->GenerateDropStats("Sprin", "LT_100"); //Sprin
-	LOOTSERVER->GenerateDropStats("Undead Maple", "LT_100"); //Undead Maple
-	LOOTSERVER->GenerateDropStats("Xetan", "LT_100"); //Xetan
-
-	////ET1
-	LOOTSERVER->GenerateDropStats("Archer Spirit", "ET1_100"); //Archer Spirit
-	LOOTSERVER->GenerateDropStats("Fighter Spirit", "ET1_100"); //Fighter Spirit
-	LOOTSERVER->GenerateDropStats("Pikeman Spirit", "ET1_100"); //Pikeman Spirit
-	LOOTSERVER->GenerateDropStats("Mechanician Spirit", "ET1_100"); //Mechanician Spirit
-	LOOTSERVER->GenerateDropStats("Undead King Hopy", "ET1_100"); //Undead King Hopy
-	LOOTSERVER->GenerateDropStats("Hobo Golem", "ET1_100"); //Hobo Golem
-
-	////ET3
-	LOOTSERVER->GenerateDropStats("Ruca", "ET3_102"); //Ruca
-	LOOTSERVER->GenerateDropStats("Naz Senior", "ET3_102"); //Naz Senior
-	LOOTSERVER->GenerateDropStats("Kakoa", "ET3_102"); //Kakoa
-	LOOTSERVER->GenerateDropStats("Igolation", "ET3_102"); //Igolation
-	LOOTSERVER->GenerateDropStats("Sprin", "ET3_102"); //Sprin
-	LOOTSERVER->GenerateDropStats("Undead Maple", "ET3_102"); //Undead Maple
-	LOOTSERVER->GenerateDropStats("Xetan", "ET3_102"); //Xetan
-
-	////Ice Mine
-	LOOTSERVER->GenerateDropStats("Undead Miner", "IM_105"); //Undead Miner
-	LOOTSERVER->GenerateDropStats("Undead Manager", "IM_105"); //Undead Manager
-	LOOTSERVER->GenerateDropStats("Tarantulika", "IM_105"); //Tarantulika
-	LOOTSERVER->GenerateDropStats("Ice Serpent", "IM_105"); //Ice Serpent
-	LOOTSERVER->GenerateDropStats("Ice Worm", "IM_105"); //Ice Worm
-	LOOTSERVER->GenerateDropStats("Mine Bat", "IM_105"); //Mine Bat
-	LOOTSERVER->GenerateDropStats("Mine Golem", "IM_105"); //Mine Golem
-	LOOTSERVER->GenerateDropStats("Seal Crasher", "IM_105"); //Seal Crasher
-
-	////Secret Lab
-	LOOTSERVER->GenerateDropStats("LTechnician", "SLAB_108"); //LTechnician
-	LOOTSERVER->GenerateDropStats("ITechnician", "SLAB_108"); //ITechnician
-	LOOTSERVER->GenerateDropStats("SLEngineer", "SLAB_108"); //SLEngineer
-	LOOTSERVER->GenerateDropStats("ISoldier", "SLAB_108"); //ISoldier
-	LOOTSERVER->GenerateDropStats("IBomber", "SLAB_108"); //IBomber
-	LOOTSERVER->GenerateDropStats("LGuardian", "SLAB_108"); //LGuardian
-	LOOTSERVER->GenerateDropStats("IElite", "SLAB_108"); //IElite
-	LOOTSERVER->GenerateDropStats("Draxos", "SLAB_108", 168); //Draxos. 168 kills per month
-
-
-	////Ancient Weapon
-	LOOTSERVER->GenerateDropStats ( "Chalybs", "AW_110" ); //Chalybs (Hunt)
-	LOOTSERVER->GenerateDropStats ( "Acero", "AW_110" ); //Acero
-	LOOTSERVER->GenerateDropStats ( "Nihil", "AW_110" ); //Nihil
-	LOOTSERVER->GenerateDropStats ( "Bomber", "AW_110" ); //Bomber
-	LOOTSERVER->GenerateDropStats ( "Psycho Soldier", "AW_110" ); //Psycho Soldier
-	LOOTSERVER->GenerateDropStats ( "Death Slave", "AW_110" ); //Death Slave
-	LOOTSERVER->GenerateDropStats ( "Greedy", "AW_110", 168 ); //Greedy (Boss). 168 kills per month
-
-	////Sea of Abyss 1
-	LOOTSERVER->GenerateDropStats("Gurkob", "SA1_113", 100000); //Gurkob
-	LOOTSERVER->GenerateDropStats("Dey", "SA1_113", 100000); //Dey
-	LOOTSERVER->GenerateDropStats("Faugn", "SA1_113", 100000); //Faugn
-	LOOTSERVER->GenerateDropStats("Shogoth", "SA1_113", 100000); //Shogoth
-	LOOTSERVER->GenerateDropStats("Arhdyra", "SA1_113", 100000); //Arhdyra
-	LOOTSERVER->GenerateDropStats("Koon", "SA1_113", 100000); //Koon
-	LOOTSERVER->GenerateDropStats("Sathla", "SA1_113", 100000); //Sathla
-
-	////Sea of Abyss 2
-	LOOTSERVER->GenerateDropStats("Elite Arhdyra", "SA2_113", 100000); //Elite Arhdyra
-	LOOTSERVER->GenerateDropStats("Elite Sathla", "SA2_113", 100000); //Elite Sathla
-
-	//// HOF
-	LOOTSERVER->GenerateDropStats("Igniculus", "HOF", 100000); //Gurkob
-	LOOTSERVER->GenerateDropStats("Lava Insec", "HOF", 100000); //Dey
-	LOOTSERVER->GenerateDropStats("Lava Archer", "HOF", 100000); //Faugn
-	LOOTSERVER->GenerateDropStats("Lava Brawler", "HOF", 100000); //Shogoth
-	LOOTSERVER->GenerateDropStats("Lava Giant", "HOF", 100000); //Arhdyra
-	LOOTSERVER->GenerateDropStats("Lava Golem", "HOF", 100000); //Koon
-	LOOTSERVER->GenerateDropStats("Flamo", "HOF", 100000); //Sathla
-
-	LOOTSERVER->GenerateDropStats("Elite Lava Giant", "HOF_Elite", 100000); //Elite Arhdyra
-	LOOTSERVER->GenerateDropStats("Elite Lava Golem", "HOF_Elite", 100000); //Elite Sathla
-
-
-	//EVENT
-	//LOOTSERVER->GenerateDropStats ( "Mama Krika", "Event" );
-	//LOOTSERVER->GenerateDropStats ( "Lady Mama Krika", "Event" );
-	//LOOTSERVER->GenerateDropStats ( "Queen Mama Krika", "Event" );
-	//LOOTSERVER->GenerateDropStats ( "Majesty Mama Krika", "Event" );
-
-#endif
-
-
 	BELLATRASERVER->Init();
-	BELLATRASERVER->TestBellatraReward();
-
-	ITEMSERVER->TestAging ( 0 );	//normal
-	ITEMSERVER->TestAging ( 1 );	//aging stone
-	ITEMSERVER->TestAging ( 2 );	//copper stone
 
 #ifdef ITEMFIXES
 	ITEMSERVER->UpdateItemFixes ( SQLCONNECTION ( DATABASEID_GameDB ) );
@@ -567,7 +444,6 @@ void Server::Load()
 
 	CHARACTERSERVER->UpdatePlayerCharacterOverallRanking ();
 
-	QUESTSERVER->RunTests ();
 	QUESTSERVER->LoadNPCQuests();
 
 	MAPSERVER->SQLBuildMapIndicators();
