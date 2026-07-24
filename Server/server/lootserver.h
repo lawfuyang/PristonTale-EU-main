@@ -52,8 +52,8 @@ public:
 
 	BOOL					DropDefinitionExistsForMonsterID ( int iMonsterDropId );
 
-	void					GenerateDropStats( std::string sMonsterName, const char * szSubFolder = "Test", int iRepeatCount = 10000);
-	void					GenerateDropStatsMap( int iMapID, const char * szSubFolder = "Test", int iRepeatCount = 10000);
+	void					GenerateDropStats( std::string sMonsterName, const char * szSubFolder = "Test", int iRepeatCount = 10000, User* pcUser = nullptr);
+	void					GenerateDropStatsMap( int iMapID, const char * szSubFolder = "Test", int iRepeatCount = 10000, User* pcUser = nullptr);
 
 	bool					bLootDebug;
 private:

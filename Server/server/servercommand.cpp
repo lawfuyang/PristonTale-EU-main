@@ -3282,7 +3282,7 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 	{
 		if (GetParameterString(pszBuff, 1, szCommandParam1))
 		{
-			LOOTSERVER->GenerateDropStats( szCommandParam1, "ServerCommand");
+			LOOTSERVER->GenerateDropStats( szCommandParam1, "ServerCommand", 10000, pcUser);
 			CHATSERVER->SendChatEx ( pcUser, CHATCOLOR_Error, "GM> Drop Table Tested for ID: %s", szCommandParam1 );
 		}
 	}

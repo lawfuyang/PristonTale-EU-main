@@ -120,7 +120,7 @@ void LootServer::SQLUpdateDropTableFromDatabase()
 
 //Test drop statistics by picking a loot from random
 //then print it out to a CSV file
-void LootServer::GenerateDropStats(std::string sMonsterName, const char * szSubFolder, int iRepeatCount)
+void LootServer::GenerateDropStats(std::string sMonsterName, const char * szSubFolder, int iRepeatCount, User* pcUser)
 {
 	//Only for game-server
 	if (LOGIN_SERVER)
@@ -183,7 +183,7 @@ void LootServer::GenerateDropStats(std::string sMonsterName, const char * szSubF
 	{
 		for (int i_DropNum = 0; i_DropNum < iNumDrops; i_DropNum++)
 		{
-			BaseDropDefinition* baseDropDefinition = GetRandomDropDefinition( lpCharacterData->iUniqueMonsterID );
+			BaseDropDefinition* baseDropDefinition = GetRandomDropDefinition( lpCharacterData->iUniqueMonsterID, pcUser );
 
 			//monster id not found
 			if (baseDropDefinition == nullptr)
@@ -404,7 +404,7 @@ void LootServer::GenerateDropStats(std::string sMonsterName, const char * szSubF
 	logger->Close();
 }
 
-void LootServer::GenerateDropStatsMap(int iMapID, const char * szSubFolder, int iRepeatCount)
+void LootServer::GenerateDropStatsMap(int iMapID, const char * szSubFolder, int iRepeatCount, User* pcUser)
 {
 	//Only for game-server
 	if (LOGIN_SERVER)
@@ -515,7 +515,7 @@ void LootServer::GenerateDropStatsMap(int iMapID, const char * szSubFolder, int 
 
 		for (int i_DropNum = 0; i_DropNum < iNumDrops; i_DropNum++)
 		{
-			BaseDropDefinition* baseDropDefinition = GetRandomDropDefinition( lpCharacterData->iUniqueMonsterID );
+			BaseDropDefinition* baseDropDefinition = GetRandomDropDefinition( lpCharacterData->iUniqueMonsterID, pcUser );
 
 			//monster id not found
 			if (baseDropDefinition == nullptr)
