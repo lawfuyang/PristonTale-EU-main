@@ -1493,27 +1493,27 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 					}
 				}
 
-				// Log equipped items for confirmation
-				auto LogEquip = [](const char* slot, EItemID id) {
-					if (id)
-					{
-						auto pDef = ITEMSERVER->FindItemDefByCode(id);
-						if (pDef)
-							INFO("  [%s] %s (ilvl %d)", slot, pDef->sItem.szItemName, pDef->sItem.iLevel);
-					}
-				};
-				INFO("Equipped items for %s:", l_UserData->szCharacterName);
-				LogEquip("Weapon", eWeaponScan);
-				LogEquip("Shield", eShieldScan);
-				LogEquip("Armor",  pcUser->eArmorEquipped);
-				LogEquip("Boots",  pcUser->eBootsEquipped);
-				LogEquip("Gaunt",  pcUser->eGauntletsEquipped);
-				LogEquip("Brace",  pcUser->eBraceletEquipped);
-				LogEquip("Ring R", pcUser->eRingRightEquipped);
-				LogEquip("Ring L", pcUser->eRingLeftEquipped);
-				LogEquip("Orb",    pcUser->eOrbEquipped);
-				LogEquip("Robe",   pcUser->eRobeEquipped);
-				LogEquip("Amulet", pcUser->eAmuletEquipped);
+				// // Log equipped items for confirmation
+				// auto LogEquip = [](const char* slot, EItemID id) {
+				// 	if (id)
+				// 	{
+				// 		auto pDef = ITEMSERVER->FindItemDefByCode(id);
+				// 		if (pDef)
+				// 			INFO("  [%s] %s (ilvl %d)", slot, pDef->sItem.szItemName, pDef->sItem.iLevel);
+				// 	}
+				// };
+				// INFO("Equipped items for %s:", l_UserData->szCharacterName);
+				// LogEquip("Weapon", eWeaponScan);
+				// LogEquip("Shield", eShieldScan);
+				// LogEquip("Armor",  pcUser->eArmorEquipped);
+				// LogEquip("Boots",  pcUser->eBootsEquipped);
+				// LogEquip("Gaunt",  pcUser->eGauntletsEquipped);
+				// LogEquip("Brace",  pcUser->eBraceletEquipped);
+				// LogEquip("Ring R", pcUser->eRingRightEquipped);
+				// LogEquip("Ring L", pcUser->eRingLeftEquipped);
+				// LogEquip("Orb",    pcUser->eOrbEquipped);
+				// LogEquip("Robe",   pcUser->eRobeEquipped);
+				// LogEquip("Amulet", pcUser->eAmuletEquipped);
 			}
 			else
 			{
