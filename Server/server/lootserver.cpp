@@ -6,6 +6,7 @@
 
 LootServer::LootServer()
 {
+	bLootDebug = false;
 }
 
 LootServer::~LootServer()
@@ -716,10 +717,7 @@ BOOL LootServer::DropDefinitionExistsForMonsterID( int iMonsterID )
 
 // ------------------------------------------------------------------
 // LOOT_MODE: Strict weapon→class signature mapping.
-// Weapons are filtered to the signature type for each class.
-// Armor/Robes are filtered: casters (Magician/Priestess/Shaman) → Robes,
-// all other classes → Armor.
-// Non-weapon, non-armor/robe items return true (no restriction).
+// Weapons, shields, armor/robes are filtered per class.
 // ------------------------------------------------------------------
 bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iClass )
 {
@@ -735,13 +733,13 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 			return ( eItemType == ITEMTYPE_Axe || eItemType == ITEMTYPE_Sword );
 
 		case CHARACTERCLASS_Mechanician:
-			return ( eItemType == ITEMTYPE_Claw || eItemType == ITEMTYPE_Hammer || eItemType == ITEMTYPE_Shield );
+			return ( eItemType == ITEMTYPE_Claw || eItemType == ITEMTYPE_Hammer );
 
 		case CHARACTERCLASS_Archer:
 			return ( eItemType == ITEMTYPE_Bow );
 
 		case CHARACTERCLASS_Atalanta:
-			return ( eItemType == ITEMTYPE_Javelin || eItemType == ITEMTYPE_Shield );
+			return ( eItemType == ITEMTYPE_Javelin );
 
 		case CHARACTERCLASS_Pikeman:
 			return ( eItemType == ITEMTYPE_Scythe );
@@ -764,6 +762,12 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 		}
 	}
 
+	// ---- Shields (only Mechanician and Atalanta) ----
+	if ( eItemType == ITEMTYPE_Shield )
+	{
+		return ( iClass == CHARACTERCLASS_Mechanician || iClass == CHARACTERCLASS_Atalanta );
+	}
+
 	// ---- Armor vs Robes ----
 	if ( eItemType == ITEMTYPE_Armor || eItemType == ITEMTYPE_Robe )
 	{
@@ -779,7 +783,7 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 		}
 	}
 
-	return true; // boots, gauntlets, shields, etc. — no restriction
+	return true; // boots, gauntlets, bracelets, rings, amulets, orbs — no restriction
 }
 
 // LOOT_MODE: Returns true if the item is acceptable — not a potion/crystal/core,
@@ -809,7 +813,14 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 	{
 		int iEquippedLevel = GetEquippedItemLevel( pDef, pcUser );
 		if ( iEquippedLevel > 0 && pDef->sItem.iLevel <= iEquippedLevel )
+		{
+			if ( LOOTSERVER->bLootDebug )
+			{
+				INFO("IsItemAcceptableInLootMode: Rejecting item %s (ilvl %d) for player %s (equipped ilvl %d)",
+					pDef->sItem.szItemName, pDef->sItem.iLevel, pcUser->GetName(), iEquippedLevel);
+			}
 			return false;
+		}
 	}
 
 	return true;
@@ -908,6 +919,10 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 						{
 							if ( IsItemAcceptableInLootMode( dwCode, iPlayerClass, pcUser ) )
 							{
+								if ( LOOTSERVER->bLootDebug )
+								{
+									INFO("GetRandomDropDefinition: Found usable item for monster in LOOT_MODE: %s", ITEMSERVER->FindItemDefByCode(dwCode)->sItem.szItemName);
+								}
 								return v; // found a usable item in this group
 							}
 						}
@@ -921,7 +936,10 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 			}
 		}
 
-		INFO( "GetRandomDropDefinition: No suitable drop found for monster in LOOT_MODE" );
+		if ( LOOTSERVER->bLootDebug )
+		{
+			INFO("GetRandomDropDefinition: No suitable drop found for monster in LOOT_MODE");
+		}
 
 		// just return nothing to not pollute the ground
 		return nullptr;
@@ -1057,9 +1075,21 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 			{
 				int count = itemDropDef->vItemCodes.size();
 				int randomIndex = Dice::RandomI( 0, count - 1 );
-				dwItemCode = itemDropDef->vItemCodes[randomIndex];
-				if ( IsItemAcceptableInLootMode( dwItemCode, (ECharacterClass)iPlayerClass, pcUser ) )
+				DWORD dwCandidate = itemDropDef->vItemCodes[randomIndex];
+				if ( IsItemAcceptableInLootMode( dwCandidate, (ECharacterClass)iPlayerClass, pcUser ) )
+				{
+					dwItemCode = dwCandidate;
 					break;
+				}
+			}
+
+			if ( !dwItemCode )
+			{
+				if ( LOOTSERVER->bLootDebug )
+				{
+					INFO("GetRandomItemForMonster: No acceptable item found for monster");
+				}
+				return FALSE; // all retries exhausted, no acceptable item in group
 			}
 		}
 		else

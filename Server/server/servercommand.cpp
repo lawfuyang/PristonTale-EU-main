@@ -4485,6 +4485,20 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 		}
 	}
 
+	if (COMMAND("/lootdebug", pszBuff))
+	{
+		if (pcUserData)
+		{
+			User* pcUser = USERDATATOUSER(pcUserData);
+			if (pcUser)
+			{
+				LOOTSERVER->bLootDebug = !LOOTSERVER->bLootDebug;
+				CHATSERVER->SendChatEx(pcUser, CHATCOLOR_Error, "> Loot Debug [%s]", LOOTSERVER->bLootDebug ? "ON" : "OFF");
+				return TRUE;
+			}
+		}
+	}
+
 	if ( COMMAND("/disable_errors_relay", pszBuff) )
 	{
 		if ( pcUserData )
