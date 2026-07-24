@@ -730,7 +730,7 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 		switch ( iClass )
 		{
 		case CHARACTERCLASS_Fighter:
-			return ( eItemType == ITEMTYPE_Axe || eItemType == ITEMTYPE_Sword );
+			return ( eItemType == ITEMTYPE_Axe );
 
 		case CHARACTERCLASS_Mechanician:
 			return ( eItemType == ITEMTYPE_Claw || eItemType == ITEMTYPE_Hammer );
@@ -749,7 +749,7 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 
 		case CHARACTERCLASS_Magician:
 		case CHARACTERCLASS_Priestess:
-			return ( eItemType == ITEMTYPE_Wand );
+			return ( eItemType == ITEMTYPE_Wand || eItemType == ITEMTYPE_Orb );
 
 		case CHARACTERCLASS_Assassin:
 			return ( eItemType == ITEMTYPE_Dagger );
@@ -765,7 +765,7 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 	// ---- Shields (only Mechanician and Atalanta) ----
 	if ( eItemType == ITEMTYPE_Shield )
 	{
-		return ( iClass == CHARACTERCLASS_Mechanician || iClass == CHARACTERCLASS_Atalanta );
+		return ( iClass == CHARACTERCLASS_Mechanician || iClass == CHARACTERCLASS_Knight || iClass == CHARACTERCLASS_Atalanta );
 	}
 
 	// ---- Armor vs Robes ----
