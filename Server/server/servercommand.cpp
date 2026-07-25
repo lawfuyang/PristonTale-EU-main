@@ -3062,8 +3062,8 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 		if ( GetParameterString( pszBuff, 1, szCommandParam1 ) )
 		{
 			int iExp = atoi( szCommandParam1 );
-			if ( iExp > 1000 )
-				iExp = 1000;
+			if ( iExp > 100000 )
+				iExp = 100000;
 			else if ( iExp < 0 )
 				iExp = 0;
 

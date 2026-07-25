@@ -9,7 +9,7 @@
 
 | Command | Effect |
 |---------|--------|
-| `/expevent <0-1000>` | Global EXP bonus % (100 = +100%) |
+| `/expevent <0-100000>` | Global EXP bonus % (100 = +100%) |
 | `/!giveexp <amount>` | Add raw EXP to yourself |
 | `/!levelup <level>` | Set level instantly |
 
