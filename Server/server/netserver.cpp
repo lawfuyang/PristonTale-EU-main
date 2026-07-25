@@ -1444,6 +1444,7 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 				// sIntentoryItems is a flat array (NOT slot-ordered) — scan by item type
 				EItemID eWeaponScan = (EItemID)0;
 				EItemID eShieldScan = (EItemID)0;
+				EItemID eSheltomScan = (EItemID)0;
 				pcUser->eArmorEquipped = (EItemID)0;
 				pcUser->eBootsEquipped = (EItemID)0;
 				pcUser->eGauntletsEquipped = (EItemID)0;
@@ -1453,6 +1454,7 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 				pcUser->eOrbEquipped = (EItemID)0;
 				pcUser->eRobeEquipped = (EItemID)0;
 				pcUser->eAmuletEquipped = (EItemID)0;
+				pcUser->eSheltomEquipped = (EItemID)0;
 
 				for (int i = 0; i < 316; i++)
 				{
@@ -1471,6 +1473,8 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 						eWeaponScan = (EItemID)item.iItemID;
 					else if (eItemType == ITEMTYPE_Shield && !eShieldScan)
 						eShieldScan = (EItemID)item.iItemID;
+					else if (eItemType == ITEMTYPE_Sheltom && !eSheltomScan)
+						eSheltomScan = (EItemID)item.iItemID;
 
 					switch (eItemType)
 					{
@@ -1495,6 +1499,7 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 
 				pcUser->eWeaponEquipped = eWeaponScan;
 				pcUser->eShieldEquipped = eShieldScan;
+				pcUser->eSheltomEquipped = eSheltomScan;
 
 				// // Log equipped items for confirmation
 				// auto LogEquip = [](const char* slot, EItemID id) {

@@ -912,6 +912,7 @@ int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser )
 	case ITEMTYPE_Orb:			eEquipped = pcUser->eOrbEquipped;			break;
 	case ITEMTYPE_Robe:			eEquipped = pcUser->eRobeEquipped;			break;
 	case ITEMTYPE_Amulet:		eEquipped = pcUser->eAmuletEquipped;		break;
+	case ITEMTYPE_Sheltom:		eEquipped = pcUser->eSheltomEquipped;		break;
 	default: return 0;
 	}
 

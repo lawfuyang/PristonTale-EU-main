@@ -312,6 +312,7 @@ void User::Init()
 	eOrbEquipped = (EItemID)0;
 	eRobeEquipped = (EItemID)0;
 	eAmuletEquipped = (EItemID)0;
+	eSheltomEquipped = (EItemID)0;
 	bTeasureHuntingMode = FALSE;
 
 

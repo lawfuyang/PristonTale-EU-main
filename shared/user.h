@@ -714,6 +714,7 @@ public:
 	EItemID									eOrbEquipped;
 	EItemID									eRobeEquipped;
 	EItemID									eAmuletEquipped;
+	EItemID									eSheltomEquipped;
 
 	DropItemData							LastDroppedItem;
 
