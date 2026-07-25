@@ -213,13 +213,13 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 	if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core )
 		return false;
 
-	// Skip monster crystals
-	if ( eItemType == ITEMTYPE_MonsterCrystal )
+	// Skip monster crystals & respec jewels
+	if ( eItemType == ITEMTYPE_MonsterCrystal || eItemType == ITEMTYPE_Respec)
 	{
 		if ( LOOTSERVER->bLootDebug )
 		{
 			auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
-			INFO("IsItemAcceptableInLootMode: Rejecting monster crystal %s",
+			INFO("IsItemAcceptableInLootMode: Rejecting monster crystal & Respec jewel %s",
 				pDef ? pDef->sItem.szItemName : "unknown");
 		}
 		return false;
@@ -337,7 +337,8 @@ int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser, DWORD*
 			auto pRingL = ITEMSERVER->FindItemDefByCode( pcUser->eRingLeftEquipped );
 			int iRingR = pRingR ? pRingR->sItem.iLevel : 0;
 			int iRingL = pRingL ? pRingL->sItem.iLevel : 0;
-			return ( iRingR > 0 && iRingL > 0 ) ? min( iRingR, iRingL ) : max( iRingR, iRingL );
+			eEquipped = ( iRingR > 0 && iRingL > 0 ) ? pcUser->eRingRightEquipped : pcUser->eRingLeftEquipped;
+			break;
 		}
 	case ITEMTYPE_Orb:			eEquipped = pcUser->eOrbEquipped;			break;
 	case ITEMTYPE_Robe:			eEquipped = pcUser->eRobeEquipped;			break;
