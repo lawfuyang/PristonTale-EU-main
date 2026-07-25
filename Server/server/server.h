@@ -38,6 +38,14 @@ extern BOOL g_bServerIsSeasonal;
 
 extern CLogger * g_pcLogger;
 
+// Master gate for offline item cache optimization.
+// When true, both OldItemDefinition and ItemList data loaded from SQL is
+// serialized to disk on first run and read back on subsequent runs,
+// skipping ~3s of SQL queries. The old item definitions are included
+// in the same cache file so neither query runs on a cache hit.
+// Set to false to always load from SQL (e.g. if DB data changes).
+constexpr bool CACHE_OLD_ITEM_DEFS = true;
+
 #define GSERVER					Server::GetInstance()
 
 #define SERVER_TYPE				(GSERVER->GetServerType())

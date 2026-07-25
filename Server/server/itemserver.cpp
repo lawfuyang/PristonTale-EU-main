@@ -2,6 +2,7 @@
 #include "itemserver.h"
 #include "Logger.h"
 #include "Utilities.h"
+#include "CacheCommon.h"
 
 DWORD pTableNewItem = 0;
 DWORD pTableNewItemSoma = 0x10;
@@ -495,13 +496,171 @@ void ItemServer::CompressItemDataInTable ( ItemData * pItem )
 
 }
 
+bool ItemServer::TryLoadItemsFromCache()
+{
+	if constexpr ( !CACHE_OLD_ITEM_DEFS )
+		return false;
+
+	char szCacheDir[260] = { 0 };
+	GetCacheDirectory( szCacheDir, sizeof( szCacheDir ) );
+
+	char szPath[260] = { 0 };
+	GetCacheFilePath( szPath, sizeof( szPath ), szCacheDir, "items_cache.bin" );
+
+	FILE* fp = NULL;
+	fopen_s( &fp, szPath, "rb" );
+	if ( !fp )
+		return false;
+
+	bool bOk = false;
+	do
+	{
+		// Read and validate header
+		DWORD dwMagic = 0;
+		int iVersion = 0;
+		int iOldItemCount = 0;
+		int iDefItemCount = 0;
+		int iAllocItemCount = 0;
+		UINT uNumItems = 0;
+		UINT uNewItemCount = 0;
+		UINT uTableCompressPos = 0;
+		UINT uItemV = 0;
+
+		if ( fread( &dwMagic, sizeof( dwMagic ), 1, fp ) != 1 ) break;
+		if ( fread( &iVersion, sizeof( iVersion ), 1, fp ) != 1 ) break;
+		if ( fread( &iOldItemCount, sizeof( iOldItemCount ), 1, fp ) != 1 ) break;
+		if ( fread( &iDefItemCount, sizeof( iDefItemCount ), 1, fp ) != 1 ) break;
+		if ( fread( &iAllocItemCount, sizeof( iAllocItemCount ), 1, fp ) != 1 ) break;
+		if ( fread( &uNumItems, sizeof( uNumItems ), 1, fp ) != 1 ) break;
+		if ( fread( &uNewItemCount, sizeof( uNewItemCount ), 1, fp ) != 1 ) break;
+		if ( fread( &uTableCompressPos, sizeof( uTableCompressPos ), 1, fp ) != 1 ) break;
+		if ( fread( &uItemV, sizeof( uItemV ), 1, fp ) != 1 ) break;
+
+		if ( dwMagic != CACHE_MAGIC_ITEMS || iVersion != CACHE_VERSION )
+			break;
+
+		if ( iOldItemCount != ITEM_SERVER_MAX || iDefItemCount != ITEM_SERVER_MAX )
+		{
+			WARN( "Item cache size mismatch (old=%d def=%d, expected %d), falling back to SQL",
+				iOldItemCount, iDefItemCount, ITEM_SERVER_MAX );
+			break;
+		}
+
+		// Allocate memory (same VirtualAlloc calls as the SQL path)
+		DefinitionItem* pDefItem = *(DefinitionItem**)0x07A9EB10;
+		pAllocItemTable = (ItemData*)VirtualAlloc( NULL, 0x314 * (1500 + 4), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+		pTableNewItem = (CompressedItem*)VirtualAlloc( NULL, 0x80 * (1500 + 4), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+
+		if ( !pAllocItemTable || !pTableNewItem )
+			break;
+
+		// Zero existing arrays before loading
+		ZeroMemory( (void*)pDefItem, ITEM_SERVER_MAX * sizeof( DefinitionItem ) );
+		ZeroMemory( OldItemDefinition, ITEM_SERVER_MAX * sizeof( DefinitionItem ) );
+
+		// Read all data arrays
+		size_t oldItemBytes = sizeof( DefinitionItem ) * ITEM_SERVER_MAX;
+		size_t defItemBytes = sizeof( DefinitionItem ) * ITEM_SERVER_MAX;
+		size_t allocItemBytes = (size_t)0x314 * iAllocItemCount;
+		size_t newItemBytes = sizeof( CompressedItem ) * uNewItemCount;
+
+		if ( fread( OldItemDefinition, 1, oldItemBytes, fp ) != oldItemBytes ) break;
+		if ( fread( pDefItem, 1, defItemBytes, fp ) != defItemBytes ) break;
+		if ( fread( pAllocItemTable, 1, allocItemBytes, fp ) != allocItemBytes ) break;
+		if ( fread( pTableNewItem, 1, newItemBytes, fp ) != newItemBytes ) break;
+
+		// Restore global state
+		NUM_ITEMS = uNumItems;
+		*(UINT*)0x07AAC890 = uNewItemCount > 3 ? uNewItemCount - 3 : 0;
+		iTableItemCompressPosition = uTableCompressPos;
+		ItemV = uItemV;
+
+		allocIT = (void*)pAllocItemTable;
+		endIT();
+		refIT();
+
+		INFO( "Loaded %d items from cache (%s)", NUM_ITEMS, szPath );
+		bOk = true;
+
+	} while ( false );
+
+	fclose( fp );
+
+	if ( !bOk )
+	{
+		// Cache load failed — clean up partial allocations so the SQL path retries
+		if ( pAllocItemTable ) { VirtualFree( pAllocItemTable, 0, MEM_RELEASE ); pAllocItemTable = NULL; }
+		if ( pTableNewItem )   { VirtualFree( pTableNewItem, 0, MEM_RELEASE ); pTableNewItem = NULL; }
+		WARN( "Item cache load failed, falling back to SQL" );
+	}
+
+	return bOk;
+}
+
+void ItemServer::SaveItemsToCache()
+{
+	if constexpr ( !CACHE_OLD_ITEM_DEFS )
+		return;
+
+	char szCacheDir[260] = { 0 };
+	GetCacheDirectory( szCacheDir, sizeof( szCacheDir ) );
+	EnsureCacheDirectoryExists( szCacheDir );
+
+	char szPath[260] = { 0 };
+	GetCacheFilePath( szPath, sizeof( szPath ), szCacheDir, "items_cache.bin" );
+
+	FILE* fp = NULL;
+	fopen_s( &fp, szPath, "wb" );
+	if ( !fp )
+	{
+		WARN( "Failed to write item cache to %s", szPath );
+		return;
+	}
+
+	DefinitionItem* pDefItem = *(DefinitionItem**)0x07A9EB10;
+	int iOldItemCount = ITEM_SERVER_MAX;
+	int iDefItemCount = ITEM_SERVER_MAX;
+	int iAllocItemCount = 1504;
+	UINT uNumItems = NUM_ITEMS;
+	UINT uNewItemCount = (*(UINT*)0x07AAC890) + 3;
+	UINT uTableCompressPos = iTableItemCompressPosition;
+	UINT uItemV = ItemV;
+
+	DWORD dwMagic = CACHE_MAGIC_ITEMS;
+	int iVersion = CACHE_VERSION;
+
+	fwrite( &dwMagic, sizeof( dwMagic ), 1, fp );
+	fwrite( &iVersion, sizeof( iVersion ), 1, fp );
+	fwrite( &iOldItemCount, sizeof( iOldItemCount ), 1, fp );
+	fwrite( &iDefItemCount, sizeof( iDefItemCount ), 1, fp );
+	fwrite( &iAllocItemCount, sizeof( iAllocItemCount ), 1, fp );
+	fwrite( &uNumItems, sizeof( uNumItems ), 1, fp );
+	fwrite( &uNewItemCount, sizeof( uNewItemCount ), 1, fp );
+	fwrite( &uTableCompressPos, sizeof( uTableCompressPos ), 1, fp );
+	fwrite( &uItemV, sizeof( uItemV ), 1, fp );
+
+	fwrite( OldItemDefinition, sizeof( DefinitionItem ) * ITEM_SERVER_MAX, 1, fp );
+	fwrite( pDefItem, sizeof( DefinitionItem ) * ITEM_SERVER_MAX, 1, fp );
+	fwrite( pAllocItemTable, 0x314 * iAllocItemCount, 1, fp );
+	fwrite( pTableNewItem, sizeof( CompressedItem ) * uNewItemCount, 1, fp );
+
+	fclose( fp );
+	INFO( "Saved %d items to cache (%s)", NUM_ITEMS, szPath );
+}
+
 void ItemServer::CreateItemMemoryTable ()
 {
 	if ( pAllocItemTable )
 		return;
 
-	ZeroMemory ( &OldItemDefinition, ITEM_SERVER_MAX * sizeof ( DefinitionItem ) );
-	CreateItemMemoryTable ( "ItemListOld", &OldItemDefinition[0], FALSE );
+	// Try loading from disk cache first (includes both old + new items)
+	if ( TryLoadItemsFromCache() )
+		return;
+
+	// Cache miss or disabled — load from SQL
+
+	ZeroMemory ( OldItemDefinition, ITEM_SERVER_MAX * sizeof ( DefinitionItem ) );
+	CreateItemMemoryTable ( "ItemListOld", OldItemDefinition, FALSE );
 
 	DefinitionItem * pDefItem = *(DefinitionItem **)0x07A9EB10;
 	ZeroMemory ( (void *)pDefItem, ITEM_SERVER_MAX * sizeof ( DefinitionItem ) );
@@ -513,6 +672,9 @@ void ItemServer::CreateItemMemoryTable ()
 	}
 
 	CreateItemMemoryTable ( "ItemList", pDefItem, TRUE );
+
+	// Save to disk cache for next startup
+	SaveItemsToCache();
 
 }
 

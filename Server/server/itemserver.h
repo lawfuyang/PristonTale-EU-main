@@ -173,6 +173,10 @@ private:
 
 	DefinitionItem								OldItemDefinition[ITEM_SERVER_MAX];
 
+	// Startup cache: save/load OldItemDefinition + main ItemList from disk
+	bool										TryLoadItemsFromCache();
+	void										SaveItemsToCache();
+
 	PremiumItem									* GetPremiumInfo( DWORD dwCode );
 
 	void										SQLUpdateHeadModel ( SQLConnection * pcDB, User * pcUser, char * headModel, int iSqlCharacterId );
