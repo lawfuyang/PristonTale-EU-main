@@ -457,46 +457,6 @@ void Server::Load()
 		PETSYSTEMHANDLER->LoadSkinData();
 	}
 
-	if (LOGIN_SERVER)
-	{
-		//Temp - to fix exp values in CharacterInfo table
-		//ServerCore::UpdateCharacterLevelAll ();
-
-		//for testing purposes
-		//ServerCore::WarehouseTest();
-
-		INI::CReader cReader("server.ini");
-
-		if ( cReader.ReadBool("Database", "UpdateItemsAndDumpItemsToItemsDB") )
-		{
-			SQLConnection* cDB;
-
-			cDB = SQLCONNECTION(DATABASEID_ItemDB);
-
-			INFO ( "Clearing ItemDump Table in ItemsDB" );
-			if (cDB->Open())
-			{
-				if (cDB->Prepare("DELETE FROM [dbo].[ItemDump]"))
-				{
-					cDB->Execute();
-				}
-
-				cDB->Close();
-			}
-
-			INFO ( "Reading in all items from player's inventory and warehouse into ItemDump table" );
-			INFO ( "And upgrading items" );
-			INFO ( "This will take up to 5 minutes. Please wait.." );
-			ServerCore::UpdateCharacterItemsLevelAll(TRUE);
-
-			cReader.WriteBool("Database", "UpdateItemsAndDumpItemsToItemsDB", FALSE);
-		}
-		else if ( cReader.ReadBool("Database", "DumpItemsToItemsDB") )
-		{
-			DumpItemsIntoDatabase();
-		}
-	}
-
 	if ( LOGIN_SERVER )
 	{
 		SqlUpdateOrInsertMetadata ( "server.version", GAME_VERSION );
@@ -509,11 +469,6 @@ void Server::Load()
 	else
 	{
 		STATUS ( "Game Server Started! (V%d)", GAME_VERSION );
-	}
-
-	if ( SERVER_IS_SEASONAL )
-	{
-		STATUS ( "This server is running as a Seasonal server" );
 	}
 
 	if ( LOGGER->GetNumOfErrors () > 0 )
