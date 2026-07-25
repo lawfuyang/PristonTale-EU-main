@@ -799,7 +799,9 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 		return false;
 
 	// Skip sheltoms when no-sheltom mode is active
-	if ( LOOTSERVER->bNoSheltomDrops && eItemBase == ITEMBASE_Sheltom )
+	// Note: sheltoms use ITEMTYPE_Sheltom (0x02350000) which sits under ITEMBASE_Defense,
+	// so we check the type mask (0xFFFF0000) not the base mask (0xFF000000).
+	if ( LOOTSERVER->bNoSheltomDrops && (dwItemCode & 0xFFFF0000) == ITEMTYPE_Sheltom )
 	{
 		if ( LOOTSERVER->bLootDebug )
 		{
