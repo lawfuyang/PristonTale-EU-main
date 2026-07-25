@@ -1493,6 +1493,9 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 					}
 				}
 
+				pcUser->eWeaponEquipped = eWeaponScan;
+				pcUser->eShieldEquipped = eShieldScan;
+
 				// // Log equipped items for confirmation
 				// auto LogEquip = [](const char* slot, EItemID id) {
 				// 	if (id)
@@ -1503,8 +1506,8 @@ void NetServer::OnReceiveClient( UserData * pcUserDataServer, void * pPacket )
 				// 	}
 				// };
 				// INFO("Equipped items for %s:", l_UserData->szCharacterName);
-				// LogEquip("Weapon", eWeaponScan);
-				// LogEquip("Shield", eShieldScan);
+				// LogEquip("Weapon", pcUser->eWeaponEquipped);
+				// LogEquip("Shield", pcUser->eShieldEquipped);
 				// LogEquip("Armor",  pcUser->eArmorEquipped);
 				// LogEquip("Boots",  pcUser->eBootsEquipped);
 				// LogEquip("Gaunt",  pcUser->eGauntletsEquipped);

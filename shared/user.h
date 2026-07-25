@@ -703,6 +703,8 @@ public:
 	short									sEquipmentMinLevel;
 
 	// Equipped item tracking for LootFilter ilvl comparison
+	EItemID									eWeaponEquipped;
+	EItemID									eShieldEquipped;
 	EItemID									eArmorEquipped;
 	EItemID									eBootsEquipped;
 	EItemID									eGauntletsEquipped;

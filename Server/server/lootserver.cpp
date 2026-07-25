@@ -763,10 +763,16 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 		}
 	}
 
-	// ---- Shields (only Mechanician and Atalanta) ----
+	// ---- Shields (only Mechanician, Knight, and Atalanta) ----
 	if ( eItemType == ITEMTYPE_Shield )
 	{
 		return ( iClass == CHARACTERCLASS_Mechanician || iClass == CHARACTERCLASS_Knight || iClass == CHARACTERCLASS_Atalanta );
+	}
+
+	// ---- Orbs (only Magician / Priestess) ----
+	if ( eItemType == ITEMTYPE_Orb )
+	{
+		return ( iClass == CHARACTERCLASS_Magician || iClass == CHARACTERCLASS_Priestess );
 	}
 
 	// ---- Armor vs Robes ----
@@ -784,7 +790,7 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 		}
 	}
 
-	return true; // boots, gauntlets, bracelets, rings, amulets, orbs — no restriction
+	return true; // boots, gauntlets, bracelets, rings, amulets — no restriction
 }
 
 // LOOT_MODE: Returns true if the item is acceptable — not a potion/crystal/core,
@@ -825,19 +831,38 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 
 	auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
 	if ( !pDef )
+	{
+		if ( LOOTSERVER->bLootDebug )
+		{
+			INFO("IsItemAcceptableInLootMode: Rejecting unknown item code %d", dwItemCode);
+		}
 		return false;
+	}
 
-	if ( pDef->JobBitCodeRandomCount == 0 )
-		return true;
-
-	if ( !ITEMSERVER->CharacterClassCanUseItem( iClass, pDef ) ||
-	     !LootServer::IsItemAcceptableForClass( dwItemCode, iClass ) )
+	// Enforce weapon/armor/orb/shield signature — the hardcoded type→class
+	// mapping in IsItemAcceptableForClass is authoritative for LOOT_MODE.
+	// (We intentionally do NOT use CharacterClassCanUseItem here because
+	//  per-item JobBitCodeRandom database flags are often incomplete —
+	//  e.g. many scythes lack the Pikeman flag despite being scythes.)
+	if ( !LootServer::IsItemAcceptableForClass( dwItemCode, iClass ) )
+	{
+		if ( LOOTSERVER->bLootDebug )
+		{
+			INFO("IsItemAcceptableInLootMode: Rejecting item %s (type 0x%08X) for class %d (signature mismatch)",
+				pDef->sItem.szItemName, eItemType, iClass);
+		}
 		return false;
+	}
 
 	// ilvl upgrade check: reject if not better than currently equipped
 	if ( pcUser )
 	{
 		int iEquippedLevel = GetEquippedItemLevel( pDef, pcUser );
+		if ( LOOTSERVER->bLootDebug )
+		{
+			INFO("IsItemAcceptableInLootMode: ilvl check for %s (ilvl %d) vs equipped ilvl %d for player %s",
+				pDef->sItem.szItemName, pDef->sItem.iLevel, iEquippedLevel, pcUser->GetName());
+		}
 		if ( iEquippedLevel > 0 && pDef->sItem.iLevel <= iEquippedLevel )
 		{
 			if ( LOOTSERVER->bLootDebug )
@@ -865,9 +890,9 @@ int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser )
 	EItemID eEquipped = (EItemID)0;
 
 	if ( eItemBase == ITEMBASE_Weapon )
-		eEquipped = pcUser->pcUserData->eWeaponEquipped;
+		eEquipped = pcUser->eWeaponEquipped;
 	else if ( eItemType == ITEMTYPE_Shield )
-		eEquipped = pcUser->pcUserData->eShieldEquipped;
+		eEquipped = pcUser->eShieldEquipped;
 	else switch ( eItemType )
 	{
 	case ITEMTYPE_Armor:		eEquipped = pcUser->eArmorEquipped;		break;
@@ -891,10 +916,25 @@ int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser )
 	}
 
 	if ( !eEquipped )
+	{
+		if ( LOOTSERVER->bLootDebug && pDef )
+		{
+			INFO("GetEquippedItemLevel: No equipped item in slot for %s (type 0x%08X) on player %s",
+				pDef->sItem.szItemName, eItemType, pcUser->GetName());
+		}
 		return 0;
+	}
 
 	auto pEquippedDef = ITEMSERVER->FindItemDefByCode( eEquipped );
-	return pEquippedDef ? pEquippedDef->sItem.iLevel : 0;
+	int iResult = pEquippedDef ? pEquippedDef->sItem.iLevel : 0;
+	if ( LOOTSERVER->bLootDebug && pDef )
+	{
+		INFO("GetEquippedItemLevel: slot for %s (type 0x%08X) -> equipped %s (code 0x%08X, ilvl %d) on player %s",
+			pDef->sItem.szItemName, eItemType,
+			pEquippedDef ? pEquippedDef->sItem.szItemName : "???",
+			eEquipped, iResult, pcUser->GetName());
+	}
+	return iResult;
 }
 
 static const int kMaxRetries = 1000;
@@ -955,9 +995,17 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 						}
 
 						// No usable items in this group — retry
+						if ( LOOTSERVER->bLootDebug )
+						{
+							INFO("GetRandomDropDefinition: No usable items in group for monster in LOOT_MODE, retrying...");
+						}
 						break;
 					}
 
+					if ( LOOTSERVER->bLootDebug )
+					{
+						INFO("GetRandomDropDefinition: Non-item drop");
+					}
 					break; // Non-item drop (shouldn't happen in LOOT_MODE), retry
 				}
 			}

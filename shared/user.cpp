@@ -301,6 +301,8 @@ void User::Init()
 	bLootFilterEnabled = 0;
 	iLootFilterFlags = 0;
 	sEquipmentMinLevel = 0;
+	eWeaponEquipped = (EItemID)0;
+	eShieldEquipped = (EItemID)0;
 	eArmorEquipped = (EItemID)0;
 	eBootsEquipped = (EItemID)0;
 	eGauntletsEquipped = (EItemID)0;
