@@ -56,6 +56,7 @@ public:
 	void					GenerateDropStatsMap( int iMapID, const char * szSubFolder = "Test", int iRepeatCount = 10000, User* pcUser = nullptr);
 
 	bool					bLootDebug;
+	bool					bNoSheltomDrops;
 private:
 
 

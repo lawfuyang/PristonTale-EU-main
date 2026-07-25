@@ -7,6 +7,7 @@
 LootServer::LootServer()
 {
 	bLootDebug = false;
+	bNoSheltomDrops = false;
 }
 
 LootServer::~LootServer()
@@ -796,6 +797,18 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 	// Skip potions, crystals, and cores in LootMode
 	if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core )
 		return false;
+
+	// Skip sheltoms when no-sheltom mode is active
+	if ( LOOTSERVER->bNoSheltomDrops && eItemBase == ITEMBASE_Sheltom )
+	{
+		if ( LOOTSERVER->bLootDebug )
+		{
+			auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
+			INFO("IsItemAcceptableInLootMode: Rejecting sheltom %s (no-sheltom mode active)",
+				pDef ? pDef->sItem.szItemName : "unknown");
+		}
+		return false;
+	}
 
 	auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
 	if ( !pDef )

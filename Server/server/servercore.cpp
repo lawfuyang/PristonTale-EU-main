@@ -249,6 +249,11 @@ void ServerCore::LoadDirty()
 	LOOT_MODE = cReader.ReadInt("Event", "LootMode");
 	if (LOOT_MODE) INFO("Event> Loot Mode: CHEAT (no gold, perfect, class match, spec)");
 
+	//No Sheltom drops: 0=normal, 1=no sheltoms drop
+	LOOT_NO_SHELTOM = cReader.ReadInt("Event", "NoSheltomDrops");
+	if (LOOT_NO_SHELTOM) INFO("Event> No Sheltom Drops: ON (sheltoms excluded from loot mode)");
+	LOOTSERVER->bNoSheltomDrops = (LOOT_NO_SHELTOM != 0);
+
 	//Aging no break  event
 	if (cReader.ReadOnOff("Event", "AgingHalfPrice"))
 	{
