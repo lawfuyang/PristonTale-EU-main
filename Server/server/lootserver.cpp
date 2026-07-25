@@ -897,6 +897,8 @@ int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser )
 	return pEquippedDef ? pEquippedDef->sItem.iLevel : 0;
 }
 
+static const int kMaxRetries = 1000;
+
 LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonsterId, User* pcUser )
 {
 	//Only for game-server
@@ -914,7 +916,6 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 
 	MonsterDropTable * monsterDropTable = &mDropTable[iMonsterId];
 
-	const int kMaxRetries = 100;
 	// LOOT_MODE: filter gold/non-class drops at the definition level.
 	// Retry up to kMaxRetries times to find a suitable drop definition.
 	if ( LOOT_MODE && pcUser )
@@ -1096,8 +1097,7 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 		if ( LOOT_MODE && pcUser )
 		{
 			int iPlayerClass = pcUser->pcUserData->sCharacterData.iClass;
-			const int kMaxItemRetries = 100;
-			for ( int iRetry = 0; iRetry < kMaxItemRetries; iRetry++ )
+			for ( int iRetry = 0; iRetry < kMaxRetries; iRetry++ )
 			{
 				int count = itemDropDef->vItemCodes.size();
 				int randomIndex = Dice::RandomI( 0, count - 1 );
