@@ -793,15 +793,26 @@ bool LootServer::IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iCl
 bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass iClass, User* pcUser )
 {
 	DWORD eItemBase = dwItemCode & 0xFF000000;
+	DWORD eItemType = dwItemCode & 0xFFFF0000;
 
 	// Skip potions, crystals, and cores in LootMode
 	if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core )
 		return false;
 
+	// Skip monster crystals
+	if ( eItemType == ITEMTYPE_MonsterCrystal )
+	{
+		if ( LOOTSERVER->bLootDebug )
+		{
+			auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
+			INFO("IsItemAcceptableInLootMode: Rejecting monster crystal %s",
+				pDef ? pDef->sItem.szItemName : "unknown");
+		}
+		return false;
+	}
+
 	// Skip sheltoms when no-sheltom mode is active
-	// Note: sheltoms use ITEMTYPE_Sheltom (0x02350000) which sits under ITEMBASE_Defense,
-	// so we check the type mask (0xFFFF0000) not the base mask (0xFF000000).
-	if ( LOOTSERVER->bNoSheltomDrops && (dwItemCode & 0xFFFF0000) == ITEMTYPE_Sheltom )
+	if ( LOOTSERVER->bNoSheltomDrops && (eItemType == ITEMTYPE_Sheltom ) )
 	{
 		if ( LOOTSERVER->bLootDebug )
 		{
