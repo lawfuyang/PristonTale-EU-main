@@ -265,20 +265,42 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 	// ilvl upgrade check: reject if not better than currently equipped
 	if ( pcUser )
 	{
-		int iEquippedLevel = GetEquippedItemLevel( pDef, pcUser );
+		DWORD dwEquippedCode = 0;
+		int iEquippedLevel = GetEquippedItemLevel( pDef, pcUser, &dwEquippedCode );
 		if ( LOOTSERVER->bLootDebug )
 		{
-			INFO("IsItemAcceptableInLootMode: ilvl check for %s (ilvl %d) vs equipped ilvl %d for player %s",
-				pDef->sItem.szItemName, pDef->sItem.iLevel, iEquippedLevel, pcUser->GetName());
+			INFO("IsItemAcceptableInLootMode: ilvl check for %s (ilvl %d, code 0x%08X) vs equipped ilvl %d (code 0x%08X) for player %s",
+				pDef->sItem.szItemName, pDef->sItem.iLevel, dwItemCode,
+				iEquippedLevel, dwEquippedCode, pcUser->GetName());
 		}
-		if ( iEquippedLevel > 0 && pDef->sItem.iLevel <= iEquippedLevel )
+
+		if ( iEquippedLevel > 0 )
 		{
-			if ( LOOTSERVER->bLootDebug )
+			// Lower ilvl → reject
+			if ( pDef->sItem.iLevel < iEquippedLevel )
 			{
-				INFO("IsItemAcceptableInLootMode: Rejecting item %s (ilvl %d) for player %s (equipped ilvl %d)",
-					pDef->sItem.szItemName, pDef->sItem.iLevel, pcUser->GetName(), iEquippedLevel);
+				if ( LOOTSERVER->bLootDebug )
+				{
+					INFO("IsItemAcceptableInLootMode: Rejecting item %s (ilvl %d < equipped ilvl %d)",
+						pDef->sItem.szItemName, pDef->sItem.iLevel, iEquippedLevel);
+				}
+				return false;
 			}
-			return false;
+
+			// Same ilvl → fall back to item code (higher code = better)
+			if ( pDef->sItem.iLevel == iEquippedLevel && dwEquippedCode > 0 )
+			{
+				if ( dwItemCode <= dwEquippedCode )
+				{
+					if ( LOOTSERVER->bLootDebug )
+					{
+						INFO("IsItemAcceptableInLootMode: Rejecting item %s (ilvl %d, code 0x%08X <= equipped code 0x%08X)",
+							pDef->sItem.szItemName, pDef->sItem.iLevel, dwItemCode, dwEquippedCode);
+					}
+					return false;
+				}
+				// Higher code → accept (falls through to return true)
+			}
 		}
 	}
 
@@ -287,7 +309,7 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 
 // Returns the ilvl of the player's equipped item in the same slot as pDef,
 // or 0 if nothing is equipped or the slot is not tracked.
-int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser )
+int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser, DWORD* pdwOutCode )
 {
 	if ( !pDef || !pcUser )
 		return 0;
@@ -333,6 +355,9 @@ int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser )
 		}
 		return 0;
 	}
+
+	if ( pdwOutCode )
+		*pdwOutCode = (DWORD)eEquipped;
 
 	auto pEquippedDef = ITEMSERVER->FindItemDefByCode( eEquipped );
 	int iResult = pEquippedDef ? pEquippedDef->sItem.iLevel : 0;
