@@ -3501,17 +3501,26 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 		PatchTeleportCore(iPage5Address, 0, MAPID_AncientWeapon);
 		PatchTeleportCore(iPage5Address, 1, MAPID_SeaOfAbyss1);
 		PatchTeleportCore(iPage5Address, 2, MAPID_HearOfFire);
-		PatchTeleportCore(iPage5Address, 3, MAPID_Invalid);
-		PatchTeleportCore(iPage5Address, 4, MAPID_Invalid);
-		PatchTeleportCore(iPage5Address, 5, MAPID_Invalid);
-		PatchTeleportCore(iPage5Address, 6, MAPID_Invalid);
-		PatchTeleportCore(iPage5Address, 7, MAPID_Invalid);
-		PatchTeleportCore(iPage5Address, 8, MAPID_Invalid);
-		PatchTeleportCore(iPage5Address, 9, MAPID_Invalid);
+		PatchTeleportCore(iPage5Address, 3, MAPID_SeaOfAbyss2);
+		PatchTeleportCore(iPage5Address, 4, MAPID_SecretLab2);
+		PatchTeleportCore(iPage5Address, 5, MAPID_Atlantis);
+		PatchTeleportCore(iPage5Address, 6, MAPID_BattleTown);
+		PatchTeleportCore(iPage5Address, 7, MAPID_CursedTempleF3);
+		PatchTeleportCore(iPage5Address, 8, MAPID_AncientDungeonF1);
+		PatchTeleportCore(iPage5Address, 9, MAPID_AncientDungeonF2);
 
+		//Teleport core page 6 / haTeleport_Field[6].sin
 		int iPage6Address = 0x04B0D1C8;
-		PatchTeleportCore(iPage6Address, 0, MAPID_Invalid);
-		//max reached
+		PatchTeleportCore(iPage6Address, 0, MAPID_AncientDungeonF3);
+		PatchTeleportCore(iPage6Address, 1, MAPID_MysteryForest1);
+		PatchTeleportCore(iPage6Address, 2, MAPID_MysteryForest2);
+		PatchTeleportCore(iPage6Address, 3, MAPID_MysteryForest3);
+		PatchTeleportCore(iPage6Address, 4, MAPID_MysteryDesert1);
+		PatchTeleportCore(iPage6Address, 5, MAPID_MysteryDesert2);
+		PatchTeleportCore(iPage6Address, 6, MAPID_MysteryDesert3);
+		PatchTeleportCore(iPage6Address, 7, MAPID_ForgottenTempleF1);
+		PatchTeleportCore(iPage6Address, 8, MAPID_ForgottenTempleF2);
+		PatchTeleportCore(iPage6Address, 9, MAPID_WindForest1);
 
 		//Patch Clever Newter (FieldLimitLevel_Table[])
 		PatchInt( (PVOID)0x00825310, MAPLEVEL( MAPID_HeartOfPerum ) );
