@@ -372,7 +372,7 @@ int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser, DWORD*
 	return iResult;
 }
 
-static const int kMaxRetries = 1000;
+static const int kMaxRetries = 100;
 
 LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonsterId, User* pcUser )
 {
