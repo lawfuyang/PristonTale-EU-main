@@ -209,8 +209,8 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 	DWORD eItemBase = dwItemCode & 0xFF000000;
 	DWORD eItemType = dwItemCode & 0xFFFF0000;
 
-	// Skip potions, crystals, and cores in LootMode
-	if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core )
+	// Skip potions, crystals, cores, premium items in LootMode
+	if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core || eItemBase == ITEMBASE_Premium )
 		return false;
 
 	// Skip monster crystals & respec jewels
