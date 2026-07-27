@@ -2160,7 +2160,6 @@ BOOL CDamageHandler::ApplyBurning( User * pcAttacker, ElementalAttackSetting * s
 
 	if ( sSetting->sPercentOfAP == 0 || sSetting->bChance == 0 || sSetting->bDurationSec == 0)
 	{
-		WARN( "ApplyBurning has missing required parameters!" );
 		return FALSE;
 	}
 
