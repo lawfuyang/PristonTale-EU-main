@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "HNSSkill.h"
-
+#include <unordered_set>
 
 
 typedef void( __cdecl *t_ForeOrbAdd ) ( UserData * pcUserData, int v, UINT SkillArray, UINT packet34, UINT packet28, UINT packet2A );
@@ -1294,6 +1294,80 @@ void CacheSkillInfoFromContainer  (PacketSkillInfoContainer * container  )
 
 void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 {
+	// Positive self-buff duration IDs to override to 1 hour (3600s)
+	static const std::unordered_set<int> kSelfBuffDurationIDs = {
+		// Knight
+		Knight_HolyBody_Duration,
+		Knight_HolyValor_Duration,
+		Knight_DrasticSpirit_Duration,
+		Knight_DivineShield_Duration,
+		Knight_HolyIncantation_Duration,
+		Knight_GodlyShield_Duration,
+		Knight_GodsBlessing_Duration,
+
+		// Mechanician
+		Mech_ExtremeShield_Duration,
+		Mech_PhysicalAbsorption_Duration,
+		Mech_Maximize_Duration,
+		Mech_Automation_Duration,
+		Mech_MetalArmor_Duration,
+		Mech_SparkShield_Duration,
+		Mech_MagneticSphere_Duration,
+		Mech_ElectricalOverload_Duration,
+		Mech_MetalGolem_Duration_New,
+
+		// Magician
+		Magician_Zenith_Duration,
+		Magician_EnchantWeapon_Duration,
+		Magician_EnergyShield_Duration,
+		Magician_SpiritElemental_Duration,
+		Magician_DancingSword_Duration,
+		Magician_FireElemental_Duration,
+
+		// Priestess
+		Priestess_HolyReflection_Duration,
+		Priestess_VirtualLife_Duration,
+		Priestess_RegenerationField_Duration,
+		Priestess_SummonMuspell_Duration,
+		Priestess_HolyMind_Duration_New,
+		Priestess_VirtualRegen_Duration_New,
+
+		// Assassin
+		Assassin_Alas_Duration,
+		Assassin_Inpes_Duration,
+		Assassin_VenomThorn_Duration_New,
+		Assassin_Blind_Duration,
+
+		// Atalanta
+		Atalanta_Windy_Duration,
+		Atalanta_TriumphOfValhalla_Duration,
+		Atalanta_HallOfValhalla_Duration,
+
+		// Archer
+		Archer_ForceofNature_Duration,
+		Archer_Falcon_Duration,
+		Archer_GoldenFalcon_Duration,
+		Archer_Wolverine_Duration,
+
+		// Fighter
+		Fighter_DemonBuff_Duration,
+		Fighter_ConcentrationSA_Duration,
+		Fighter_Berserker_Duration,
+
+		// Pikeman
+		Pikeman_Vanish_Duration,
+		Pikeman_AssassinsEye_Duration,
+		Pikeman_Vague_Duration,
+
+		// Shaman
+		Shaman_ChasingHunt_Duration,
+		Shaman_AdventMigal_Duration,
+		Shaman_Rainmaker_Duration,
+		Shaman_AdventMidranda_Duration,
+		Shaman_SummonHestian_Duration,
+	};
+	static const int kOneHourSeconds = 3600;
+
 	UINT uPosition = 0;
 
 	for ( int i = 0; i < container->iCount; i++ )
@@ -1301,6 +1375,17 @@ void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 		SkillArrayData * data = &container->skillArrayData[i];
 
 		int skillArrayPointerId = data->dwSkillArrayAddressOrIndex & 0x0FFFFFFF; //remove injected value at 0xF0000000;
+
+		// Override positive self-buff durations to 1 hour
+		// This affects both server-side buff calculations and client UI display
+		if ( kSelfBuffDurationIDs.find( skillArrayPointerId ) != kSelfBuffDurationIDs.end() )
+		{
+			for ( int k = 0; k < 10; k++ )
+			{
+				if ( data->iSkillValues[k] > 0 && data->iSkillValues[k] < kOneHourSeconds )
+					data->iSkillValues[k] = kOneHourSeconds;
+			}
+		}
 
 		if ( mapSkillData.find ( skillArrayPointerId ) == mapSkillData.end () )
 		{
