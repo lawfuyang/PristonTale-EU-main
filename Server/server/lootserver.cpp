@@ -7,7 +7,6 @@
 LootServer::LootServer()
 {
 	bLootDebug = false;
-	bNoSheltomDrops = false;
 }
 
 LootServer::~LootServer()
@@ -220,18 +219,6 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 		{
 			auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
 			INFO("IsItemAcceptableInLootMode: Rejecting monster crystal & Respec jewel %s",
-				pDef ? pDef->sItem.szItemName : "unknown");
-		}
-		return false;
-	}
-
-	// Skip sheltoms when no-sheltom mode is active
-	if ( LOOTSERVER->bNoSheltomDrops && (eItemType == ITEMTYPE_Sheltom ) )
-	{
-		if ( LOOTSERVER->bLootDebug )
-		{
-			auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
-			INFO("IsItemAcceptableInLootMode: Rejecting sheltom %s (no-sheltom mode active)",
 				pDef ? pDef->sItem.szItemName : "unknown");
 		}
 		return false;

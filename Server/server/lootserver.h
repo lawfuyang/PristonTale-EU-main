@@ -53,7 +53,6 @@ public:
 	BOOL					DropDefinitionExistsForMonsterID ( int iMonsterDropId );
 
 	bool					bLootDebug;
-	bool					bNoSheltomDrops;
 private:
 
 

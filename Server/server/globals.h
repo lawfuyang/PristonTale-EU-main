@@ -105,7 +105,7 @@ extern int								SKILL_SP_COST_PERCENT;
 extern BOOL								ALWAYS_AGING_SUCCESS;
 
 extern int								LOOT_MODE;
-extern int								LOOT_NO_SHELTOM;
+
 //FURY ARENA
 extern BOOL								bFuryArenaEnabled;
 extern int								iFuryArenaKingFuryExpInitial;

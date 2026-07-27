@@ -4487,20 +4487,6 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 		}
 	}
 
-	if (COMMAND("/nosheltom", pszBuff))
-	{
-		if (pcUserData)
-		{
-			User* pcUser = USERDATATOUSER(pcUserData);
-			if (pcUser)
-			{
-				LOOTSERVER->bNoSheltomDrops = !LOOTSERVER->bNoSheltomDrops;
-				CHATSERVER->SendChatEx(pcUser, CHATCOLOR_Error, "> No Sheltom Drops [%s]", LOOTSERVER->bNoSheltomDrops ? "ON" : "OFF");
-				return TRUE;
-			}
-		}
-	}
-
 	if ( COMMAND("/disable_errors_relay", pszBuff) )
 	{
 		if ( pcUserData )
