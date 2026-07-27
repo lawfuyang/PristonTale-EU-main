@@ -261,7 +261,7 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 				iEquippedLevel, dwEquippedCode, pcUser->GetName());
 		}
 
-		if ( iEquippedLevel > 0 )
+		if ( dwEquippedCode > 0 )
 		{
 			// Lower ilvl → reject
 			if ( pDef->sItem.iLevel < iEquippedLevel )
@@ -274,8 +274,10 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 				return false;
 			}
 
-			// Same ilvl → fall back to item code (higher code = better)
-			if ( pDef->sItem.iLevel == iEquippedLevel && dwEquippedCode > 0 )
+			// Same ilvl → fall back to item code (higher code = better).
+			// This also handles ilvl-0 vs ilvl-0 comparisons (e.g. Stone Axe wa101
+			// vs Steel Axe wa102) which the previous iEquippedLevel > 0 gate missed.
+			if ( pDef->sItem.iLevel == iEquippedLevel )
 			{
 				if ( dwItemCode <= dwEquippedCode )
 				{
