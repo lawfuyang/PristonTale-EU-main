@@ -1,7 +1,12 @@
 # Priston Tale — Complete Cheats & Modifications Reference
 
 ## 0. Common GetItem Codes
+
+## teleport core
 /getitem BI108
+
+## topaz stone
+/getitem BI163
 
 ## 1. Chat Commands (type `/activategm` first)
 
@@ -9,7 +14,7 @@
 
 | Command | Effect |
 |---------|--------|
-| `/expevent <0-100000>` | Global EXP bonus % (100 = +100%) |
+| `/expevent <0-INT32_MAX>` | Global EXP bonus % (100 = +100%) |
 | `/!giveexp <amount>` | Add raw EXP to yourself |
 | `/!levelup <level>` | Set level instantly |
 
@@ -19,7 +24,7 @@
 |---------|--------|
 | `/GetGold <amount>` | Add gold |
 | `/GetCoins <amount>` | Add Coin Shop credits |
-| `/getitem <code> [class] [spec] [age] [rarity] [perfect]` | Spawn item (e.g. `/getitem wa131`) |
+| `/getitem <code> [class] [spec] [age] [rarity] [perfect]` | Spawn item (e.g. `/getitem wp102 ps 0 5 1`) |
 | `/getitemperf <code> <spec>` | Spawn perfect item |
 | `/gethpg <count>` | Grand HP Potions |
 
