@@ -67,7 +67,8 @@ private:
 	/// </summary>
 	static bool				IsItemAcceptableForClass( DWORD dwItemCode, ECharacterClass iClass );
 	static bool				IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass iClass, User* pcUser = nullptr );
-	static int				GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser, DWORD* pdwOutCode = nullptr );
+private:
+	static EItemID			GetEquippedItemCode( DefinitionItem* pDef, User* pcUser );
 
 	std::map<int, MonsterDropTable>				      mDropTable;
 	std::mutex										  mDropTableMutex;

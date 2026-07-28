@@ -55,7 +55,6 @@ private:
 	static const	DWORD		pfnHash = 0x00415F80;
 
 
-	static void								FixItemBasedOnRarity(Item* item, const EItemRarity& itemRarity, BOOL bReverse = FALSE);
 	static void								SetRarityBoostArmors(Item* item, const int statsBoostMultiplier, const int itemLevel);
 	static void								SetRarityBoostBoots(Item* item, const int statsBoostMultiplier, const int itemLevel);
 	static void								SetRarityBoostRobes(Item* item, const int statsBoostMultiplier, const int itemLevel);
@@ -65,6 +64,9 @@ private:
 	static void								SetRarityBoostRings(Item* item, const int statsBoostMultiplier, const int itemLevel);
 	static void								SetRarityBoostShields(Item* item, const int statsBoostMultiplier, const int itemLevel);
 	static void								SetRarityBoostOrbs(Item* item, const int statsBoostMultiplier, const int itemLevel);
+
+public:
+	static void								FixItemBasedOnRarity(Item* item, const EItemRarity& itemRarity, BOOL bReverse = FALSE);
 
 public:
 	static DWORD *				pdwTickCount;

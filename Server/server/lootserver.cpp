@@ -249,116 +249,91 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 		return false;
 	}
 
-	// ilvl upgrade check: reject if not better than currently equipped
-	if ( pcUser )
+	// Item code upgrade check: only accept if better than currently equipped
+	// or already owned. Item codes are progressive (wp120 < wp121).
+	// Same code only accepted if no LEGENDARY copy exists on the player.
+	if ( pcUser && pcUser->pcUserData )
 	{
-		DWORD dwEquippedCode = 0;
-		int iEquippedLevel = GetEquippedItemLevel( pDef, pcUser, &dwEquippedCode );
-		if ( LOOTSERVER->bLootDebug )
+		EItemID eEquipped = GetEquippedItemCode( pDef, pcUser );
+
+		// Reject if a lower code than what's equipped (also checks ilvl for sheltoms)
+		if ( eEquipped && dwItemCode < (DWORD)eEquipped )
 		{
-			INFO("IsItemAcceptableInLootMode: ilvl check for %s (ilvl %d, code 0x%08X) vs equipped ilvl %d (code 0x%08X) for player %s",
-				pDef->sItem.szItemName, pDef->sItem.iLevel, dwItemCode,
-				iEquippedLevel, dwEquippedCode, pcUser->GetName());
+			if ( LOOTSERVER->bLootDebug )
+			{
+				INFO("IsItemAcceptableInLootMode: Rejecting item %s (code 0x%08X < equipped code 0x%08X)",
+					pDef->sItem.szItemName, dwItemCode, (DWORD)eEquipped);
+			}
+			return false;
 		}
 
-		if ( dwEquippedCode > 0 )
+		// Same or higher code — check inventory for any LEGENDARY copy
+		DWORD eItemType = pDef->sItem.sItemID.ToItemType();
+		for ( int i = 0; i < 316; i++ )
 		{
-			// Lower ilvl → reject
-			if ( pDef->sItem.iLevel < iEquippedLevel )
+			DropItemData& dropItem = pcUser->pcUserData->sIntentoryItems[i];
+			if ( !dropItem.iItemID || !dropItem.iChk1 || !dropItem.iChk2 )
+				continue;
+
+			// Only check items of the same type
+			DWORD eInvType = (DWORD)dropItem.iItemID & 0xFFFF0000;
+			if ( eInvType != eItemType )
+				continue;
+
+			// Only reject if we find a LEGENDARY copy of this exact item code
+			if ( (DWORD)dropItem.iItemID != dwItemCode )
+				continue;
+
+			ItemLoadData itemLoadData;
+			ZeroMemory( &itemLoadData, sizeof( ItemLoadData ) );
+
+			char szCode[128] = { 0 };
+			STRINGFORMAT( szCode, "%d@%d", dropItem.iChk1, dropItem.iChk2 );
+
+			if ( ITEMSERVER->OnLoadItemData( &itemLoadData, szCode ) &&
+				 itemLoadData.sItem.eRarity >= EItemRarity::LEGENDARY )
 			{
 				if ( LOOTSERVER->bLootDebug )
 				{
-					INFO("IsItemAcceptableInLootMode: Rejecting item %s (ilvl %d < equipped ilvl %d)",
-						pDef->sItem.szItemName, pDef->sItem.iLevel, iEquippedLevel);
+					INFO("IsItemAcceptableInLootMode: Rejecting item %s (already own LEGENDARY copy)",
+						pDef->sItem.szItemName);
 				}
 				return false;
 			}
-
-			// Same ilvl → fall back to item code (higher code = better).
-			// This also handles ilvl-0 vs ilvl-0 comparisons (e.g. Stone Axe wa101
-			// vs Steel Axe wa102) which the previous iEquippedLevel > 0 gate missed.
-			if ( pDef->sItem.iLevel == iEquippedLevel )
-			{
-				if ( dwItemCode <= dwEquippedCode )
-				{
-					if ( LOOTSERVER->bLootDebug )
-					{
-						INFO("IsItemAcceptableInLootMode: Rejecting item %s (ilvl %d, code 0x%08X <= equipped code 0x%08X)",
-							pDef->sItem.szItemName, pDef->sItem.iLevel, dwItemCode, dwEquippedCode);
-					}
-					return false;
-				}
-				// Higher code → accept (falls through to return true)
-			}
 		}
+		// No LEGENDARY copy found → accept
 	}
 
 	return true;
 }
 
-// Returns the ilvl of the player's equipped item in the same slot as pDef,
-// or 0 if nothing is equipped or the slot is not tracked.
-int LootServer::GetEquippedItemLevel( DefinitionItem* pDef, User* pcUser, DWORD* pdwOutCode )
+// Shared helper: returns the equipped EItemID for the slot matching pDef's type.
+EItemID LootServer::GetEquippedItemCode( DefinitionItem* pDef, User* pcUser )
 {
 	if ( !pDef || !pcUser )
-		return 0;
+		return (EItemID)0;
 
 	DWORD eItemType = pDef->sItem.sItemID.ToItemType();
 	DWORD eItemBase = eItemType & 0xFF000000;
 
-	EItemID eEquipped = (EItemID)0;
-
 	if ( eItemBase == ITEMBASE_Weapon )
-		eEquipped = pcUser->eWeaponEquipped;
-	else if ( eItemType == ITEMTYPE_Shield )
-		eEquipped = pcUser->eShieldEquipped;
-	else switch ( eItemType )
-	{
-	case ITEMTYPE_Armor:		eEquipped = pcUser->eArmorEquipped;		break;
-	case ITEMTYPE_Boots:		eEquipped = pcUser->eBootsEquipped;		break;
-	case ITEMTYPE_Gauntlets:	eEquipped = pcUser->eGauntletsEquipped;	break;
-	case ITEMTYPE_Bracelets:	eEquipped = pcUser->eBraceletEquipped;	break;
-	case ITEMTYPE_Ring:
-	case ITEMTYPE_Ring2:
-		// Compare against the lower-level ring so either ring slot gets an upgrade
-		{
-			auto pRingR = ITEMSERVER->FindItemDefByCode( pcUser->eRingRightEquipped );
-			auto pRingL = ITEMSERVER->FindItemDefByCode( pcUser->eRingLeftEquipped );
-			int iRingR = pRingR ? pRingR->sItem.iLevel : 0;
-			int iRingL = pRingL ? pRingL->sItem.iLevel : 0;
-			eEquipped = ( iRingR > 0 && iRingL > 0 ) ? pcUser->eRingRightEquipped : pcUser->eRingLeftEquipped;
-			break;
-		}
-	case ITEMTYPE_Orb:			eEquipped = pcUser->eOrbEquipped;			break;
-	case ITEMTYPE_Robe:			eEquipped = pcUser->eRobeEquipped;			break;
-	case ITEMTYPE_Amulet:		eEquipped = pcUser->eAmuletEquipped;		break;
-	case ITEMTYPE_Sheltom:		eEquipped = pcUser->eSheltomEquipped;		break;
-	default: return 0;
-	}
+		return pcUser->eWeaponEquipped;
 
-	if ( !eEquipped )
+	switch ( eItemType )
 	{
-		if ( LOOTSERVER->bLootDebug && pDef )
-		{
-			INFO("GetEquippedItemLevel: No equipped item in slot for %s (type 0x%08X) on player %s",
-				pDef->sItem.szItemName, eItemType, pcUser->GetName());
-		}
-		return 0;
+	case ITEMTYPE_Shield:		return pcUser->eShieldEquipped;
+	case ITEMTYPE_Armor:		return pcUser->eArmorEquipped;
+	case ITEMTYPE_Boots:		return pcUser->eBootsEquipped;
+	case ITEMTYPE_Gauntlets:	return pcUser->eGauntletsEquipped;
+	case ITEMTYPE_Bracelets:	return pcUser->eBraceletEquipped;
+	case ITEMTYPE_Ring:			return pcUser->eRingLeftEquipped;
+	case ITEMTYPE_Ring2:		return pcUser->eRingRightEquipped;
+	case ITEMTYPE_Orb:			return pcUser->eOrbEquipped;
+	case ITEMTYPE_Robe:			return pcUser->eRobeEquipped;
+	case ITEMTYPE_Amulet:		return pcUser->eAmuletEquipped;
+	case ITEMTYPE_Sheltom: 		return pcUser->eSheltomEquipped;
+	default:					return (EItemID)0;
 	}
-
-	if ( pdwOutCode )
-		*pdwOutCode = (DWORD)eEquipped;
-
-	auto pEquippedDef = ITEMSERVER->FindItemDefByCode( eEquipped );
-	int iResult = pEquippedDef ? pEquippedDef->sItem.iLevel : 0;
-	if ( LOOTSERVER->bLootDebug && pDef )
-	{
-		INFO("GetEquippedItemLevel: slot for %s (type 0x%08X) -> equipped %s (code 0x%08X, ilvl %d) on player %s",
-			pDef->sItem.szItemName, eItemType,
-			pEquippedDef ? pEquippedDef->sItem.szItemName : "???",
-			eEquipped, iResult, pcUser->GetName());
-	}
-	return iResult;
 }
 
 static const int kMaxRetries = 1000;
@@ -635,6 +610,15 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 			if (LOOT_MODE && pcUser)
 			{
 				ITEMSERVER->CreatePerfectItem(psItem, pDefItem, eItemSource, iPlayerClass);
+
+				// Force LEGENDARY rarity for all LOOT_MODE drops
+				if (ITEMSERVER->IsItemAbleToHaveRarity(psItem) && psItem->eRarity < EItemRarity::LEGENDARY)
+				{
+					ServerCore::FixItemBasedOnRarity(psItem, psItem->eRarity, TRUE);     // reverse current rarity
+					psItem->eRarity = EItemRarity::LEGENDARY;
+					ServerCore::FixItemBasedOnRarity(psItem, EItemRarity::LEGENDARY, FALSE); // apply legendary
+				}
+
 				ITEMSERVER->ReformItem(psItem);
 			}
 			else

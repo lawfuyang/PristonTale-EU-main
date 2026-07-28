@@ -1910,7 +1910,7 @@ void ItemServer::CreatePerfectItem( Item * psOut, DefinitionItem * psIn, EItemSo
 	*( UINT* )0x8B70264 = 1;
 	*( UINT* )0x8B70268 = iSpeck;
 
-	CreateItem( psOut, psIn, eItemSource, iSpeck, iSpecAtkRating, iAgeLevel );
+	CreateItem( psOut, psIn, eItemSource, iSpeck, iSpecAtkRating, iAgeLevel, EItemRarity::NONE, TRUE );
 
 	*( UINT* )0x8B70264 = 0;
 	*( UINT* )0x8B70268 = 0;

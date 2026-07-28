@@ -1143,7 +1143,7 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 					{
 						*(UINT *)0x8B70264 = 1;
 						*(UINT *)0x8B70268 = charClass;
-						ITEMSERVER->CreateItem( &sItem, psDef, EItemSource::GameMaster, charClass, iSpecAtkRating, iItemAge );
+						ITEMSERVER->CreateItem( &sItem, psDef, EItemSource::GameMaster, charClass, iSpecAtkRating, iItemAge, CurrentRarity );
 						*(UINT *)0x8B70264 = 0;
 						*(UINT *)0x8B70268 = 0;
 
