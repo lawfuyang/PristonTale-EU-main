@@ -3062,10 +3062,7 @@ BOOL ServerCommand::OnGameMasterAdminCommand( User * pcUser, const char * pszBuf
 		if ( GetParameterString( pszBuff, 1, szCommandParam1 ) )
 		{
 			int iExp = atoi( szCommandParam1 );
-			if ( iExp > 100000 )
-				iExp = 100000;
-			else if ( iExp < 0 )
-				iExp = 0;
+			iExp = std::max(0, iExp);
 
 			CHATSERVER->SendChatEx( pcUser, CHATCOLOR_Error, "> EXP Event: %d%% -> %d%%", *(int*)0x0084601C, iExp );
 			*(int*)(0x0084601C)		= iExp;
