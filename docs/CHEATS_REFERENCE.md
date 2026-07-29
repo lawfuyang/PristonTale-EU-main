@@ -24,7 +24,7 @@
 |---------|--------|
 | `/GetGold <amount>` | Add gold |
 | `/GetCoins <amount>` | Add Coin Shop credits |
-| `/getitem <code> [class] [spec] [age] [rarity] [perfect]` | Spawn item (e.g. `/getitem wp102 ps 0 5 1`) |
+| `/getitem <code> [class] [spec] [atk_rating] [age] [rarity] [perfect]` | Spawn item (e.g. `/getitem wp102 ps 1 0 5 1`) |
 | `/getitemperf <code> <spec>` | Spawn perfect item |
 | `/gethpg <count>` | Grand HP Potions |
 
