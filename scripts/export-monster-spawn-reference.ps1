@@ -53,7 +53,7 @@ $mapMonsters = New-Object System.Data.DataTable
 Write-Host "Fetching monster data..." -ForegroundColor DarkGray
 $cmdMon = $conn.CreateCommand()
 $cmdMon.CommandTimeout = 0
-$cmdMon.CommandText = "SELECT ID, Name, Level, HP, ATKPowMin, ATKPowMax, Defense, Absorb, EXP, MonsterType FROM dbo.MonsterList ORDER BY Level, Name"
+$cmdMon.CommandText = "SELECT ID, Name, Level, HealthPoint, ATKPowMin, ATKPowMax, Defense, Absorb, EXP, MonsterType FROM dbo.MonsterList ORDER BY Level, Name"
 $daMon = New-Object System.Data.SqlClient.SqlDataAdapter $cmdMon
 $monsters = New-Object System.Data.DataTable
 [void]$daMon.Fill($monsters)
@@ -160,7 +160,7 @@ $sb = New-Object System.Text.StringBuilder
 
 foreach ($row in $monstersWithZones) {
     $monName = $row['Name'].ToString().Trim()
-    $monId = $row['ID']; $monLvl = $row['Level']; $monHP = $row['HP']
+    $monId = $row['ID']; $monLvl = $row['Level']; $monHP = $row['HealthPoint']
     $monAtkMin = $row['ATKPowMin']; $monAtkMax = $row['ATKPowMax']
     $monDef = $row['Defense']; $monType = $row['MonsterType']
     $atkStr = if ($monAtkMin -and $monAtkMax) { "$monAtkMin-$monAtkMax" } else { '-' }
@@ -187,7 +187,7 @@ foreach ($row in $monstersWithZones) {
 
 foreach ($row in $monstersWithoutZones) {
     $monName = $row['Name'].ToString().Trim()
-    $monId = $row['ID']; $monLvl = $row['Level']; $monHP = $row['HP']
+    $monId = $row['ID']; $monLvl = $row['Level']; $monHP = $row['HealthPoint']
     $monAtkMin = $row['ATKPowMin']; $monAtkMax = $row['ATKPowMax']
     $monDef = $row['Defense']; $monType = $row['MonsterType']
     $atkStr = if ($monAtkMin -and $monAtkMax) { "$monAtkMin-$monAtkMax" } else { '-' }

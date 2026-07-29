@@ -43,7 +43,7 @@ $mapMonsters = New-Object System.Data.DataTable
 Write-Host "Fetching monster data..." -ForegroundColor DarkGray
 $cmdMon = $conn.CreateCommand()
 $cmdMon.CommandTimeout = 0
-$cmdMon.CommandText = "SELECT ID, Name, Level, HP, ATKPowMin, ATKPowMax, Defense, Absorb, EXP FROM dbo.MonsterList ORDER BY Level, Name"
+$cmdMon.CommandText = "SELECT ID, Name, Level, HealthPoint, ATKPowMin, ATKPowMax, Defense, Absorb, EXP FROM dbo.MonsterList ORDER BY Level, Name"
 $daMon = New-Object System.Data.SqlClient.SqlDataAdapter $cmdMon
 $monsters = New-Object System.Data.DataTable
 [void]$daMon.Fill($monsters)
@@ -57,7 +57,7 @@ foreach ($row in $monsters.Rows) {
     $name = $row['Name']
     if ($name -and $name.ToString().Trim()) {
         $monsterLookup[$name] = @{
-            Level = $row['Level']; HP = $row['HP']
+            Level = $row['Level']; HP = $row['HealthPoint']
             MinAtk = $row['ATKPowMin']; MaxAtk = $row['ATKPowMax']
             Defense = $row['Defense']; Absorb = $row['Absorb']; EXP = $row['EXP']
         }

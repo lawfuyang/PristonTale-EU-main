@@ -1,7 +1,7 @@
 ﻿# Zone & Monster Reference
 
 > Auto-generated from `GameDB.dbo.MapList`, `GameDB.dbo.MapMonster`, and `GameDB.dbo.MonsterList`
-> Generated: 2026-07-21 21:26:47
+> Generated: 2026-07-29 17:27:16
 
 > **Zone Level** = median of all monster levels that spawn in the zone.
 
@@ -110,7 +110,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Hopy | 35 | 4 | 30 | 2-3 | 10 | 0 | 105 |
 | Mushroom Ghost | 25 | 5 | 40 | 2-3 | 10 | 1 | 106 |
-| Cuepy | 12 | 5 | 50 | 2-5 | 14 | 0 | 111 |
+| Cuepy | 12 | 5 | 30 | 2-5 | 14 | 0 | 111 |
 | Arma | 20 | 6 | 44 | 2-4 | 8 | 0 | 90 |
 | Hobgoblin | 8 | 14 | 130 | 9-15 | 70 | 4 | 670 |
 
@@ -778,7 +778,7 @@
 
 | Boss | Hours | Sub Monsters | Sub Count | Level | HP |
 | --- | --- | --- | --- | --- | --- |
-| **Devil Shy** | 0 4 8 12 16 20 | Xetan | 2 | 115 | 30000 |
+| **Devil Shy** | 0 4 8 12 16 20 | Xetan | 2 | 115 | 450000 |
 
 ### Secret Laboratory (ID: 61)
 
@@ -791,16 +791,16 @@
 | ITechnician | 20 | 113 | 30000 | 375-425 | 1300 | 50 | 1687000 |
 | LTechnician | 20 | 113 | 30000 | 200-440 | 1300 | 50 | 1687000 |
 | SLEngineer | 20 | 114 | 30000 | 200-440 | 1300 | 50 | 1687000 |
-| ISoldier | 20 | 115 | 30000 | 400-485 | 2000 | 60 | 1771350 |
-| IBomber | 20 | 117 | 30000 | 200-400 | 1500 | 60 | 1771350 |
-| IElite | 10 | 118 | 30000 | 400-550 | 2500 | 55 | 1855700 |
-| LGuardian | 20 | 118 | 30000 | 400-550 | 2000 | 50 | 1771350 |
+| ISoldier | 20 | 115 | 60000 | 400-485 | 2000 | 60 | 1771350 |
+| IBomber | 20 | 117 | 60000 | 200-400 | 1500 | 60 | 1771350 |
+| IElite | 10 | 118 | 90000 | 400-550 | 2500 | 55 | 1855700 |
+| LGuardian | 20 | 118 | 60000 | 400-550 | 2000 | 50 | 1771350 |
 
 **Bosses:**
 
 | Boss | Hours | Sub Monsters | Sub Count | Level | HP |
 | --- | --- | --- | --- | --- | --- |
-| **Draxos** | 3 7 11 15 19 23 | Draxos Guard | 9 | 100 | 30000 |
+| **Draxos** | 3 7 11 15 19 23 | Draxos Guard | 9 | 100 | 900000 |
 
 ### Endless Tower 2 (ID: 41)
 
@@ -880,7 +880,7 @@
 
 | Boss | Hours | Sub Monsters | Sub Count | Level | HP |
 | --- | --- | --- | --- | --- | --- |
-| **Tulla** | 1 5 9 13 17 21 | Seal Crasher | 8 | 120 | 30000 |
+| **Tulla** | 1 5 9 13 17 21 | Seal Crasher | 8 | 120 | 600000 |
 
 ### Ancient Dungeon 2 (ID: 56)
 
@@ -920,8 +920,8 @@
 
 | Monster | Count | Level | HP | ATK | DEF | ABS | EXP |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Elite Sathla | 10 | 126 | 30000 | 508-630 | 2100 | 65 | 2950000 |
-| Elite Arhdyra | 10 | 126 | 30000 | 570-705 | 2500 | 65 | 2950000 |
+| Elite Sathla | 10 | 126 | 240000 | 508-630 | 2100 | 65 | 2950000 |
+| Elite Arhdyra | 10 | 126 | 210000 | 570-705 | 2500 | 65 | 2950000 |
 
 ### Bellatra (ID: 30)
 
@@ -941,103 +941,17 @@
 
 | Monster | Count | Level | HP | ATK | DEF | ABS | EXP |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Nihil | 8 | 135 | 30000 | 333-433 | 1600 | 60 | 1200000 |
-| Acero | 8 | 135 | 30000 | 333-433 | 1600 | 60 | 1200000 |
-| Chalybs | 5 | 135 | 30000 | 425-525 | 2500 | 55 | 1400000 |
-| Death Slave | 15 | 135 | 30000 | 400-520 | 1600 | 60 | 1000000 |
-| Psycho Soldier | 12 | 135 | 30000 | 400-550 | 2000 | 60 | 1200000 |
-| Bomber | 15 | 135 | 30000 | 400-520 | 1600 | 60 | 1000000 |
+| Nihil | 8 | 135 | 90000 | 333-433 | 1600 | 60 | 1200000 |
+| Acero | 8 | 135 | 90000 | 333-433 | 1600 | 60 | 1200000 |
+| Chalybs | 5 | 135 | 120000 | 425-525 | 2500 | 55 | 1400000 |
+| Death Slave | 15 | 135 | 60000 | 400-520 | 1600 | 60 | 1000000 |
+| Psycho Soldier | 12 | 135 | 60000 | 400-550 | 2000 | 60 | 1200000 |
+| Bomber | 15 | 135 | 90000 | 400-520 | 1600 | 60 | 1000000 |
 
 **Bosses:**
 
 | Boss | Hours | Sub Monsters | Sub Count | Level | HP |
 | --- | --- | --- | --- | --- | --- |
-| **Greedy** | 0 6 12 18 | Chalybs | 6 | 135 | 30000 |
+| **Greedy** | 0 6 12 18 | Chalybs | 6 | 135 | 1200000 |
 
 
-## Leveling Zone Recommendations
-
-> Zones where >70% of monsters are within ±10 levels of the player.
-> *Computed 2026-07-24.*
-
-| Player Level | Qualifying Zones (>70% in range) |
-| --- | --- |
-| 1 | **Garden of Freedom (92.0%)**, Road to the Wind (91.7%), Bamboo Forest (86.8%) |
-| 2–3 | **Bamboo Forest (93.4%)**, Garden of Freedom (92.0%), Road to the Wind (91.7%), Valley of Tranquility (90.0%) |
-| 4 | **Road to the Wind (100.0%)**, **Garden of Freedom (100.0%)**, Bamboo Forest (93.4%), Valley of Tranquility (90.0%), Acacia Groove (70.6%) |
-| 5–6 | **Road to the Wind (100.0%)**, **Garden of Freedom (100.0%)**, Valley of Tranquility (95.0%), Bamboo Forest (93.4%), Land of Dusk (81.0%), Acacia Groove (70.6%) |
-| 7–11 | **Road to the Wind (100.0%)**, **Garden of Freedom (100.0%)**, **Bamboo Forest (100.0%)**, **Valley of Tranquility (100.0%)**, **Land of Dusk (100.0%)**, Acacia Groove (89.0%) |
-| 12 | **Road to the Wind (100.0%)**, **Garden of Freedom (100.0%)**, **Bamboo Forest (100.0%)**, **Valley of Tranquility (100.0%)**, **Land of Dusk (100.0%)**, Acacia Groove (89.0%), Forest of Spirits (72.0%) |
-| 13–14 | **Road to the Wind (100.0%)**, **Garden of Freedom (100.0%)**, **Bamboo Forest (100.0%)**, **Valley of Tranquility (100.0%)**, **Land of Dusk (100.0%)**, Acacia Groove (89.0%), Castle of the Lost (75.5%), Forest of Spirits (72.0%) |
-| 15 | **Bamboo Forest (100.0%)**, **Valley of Tranquility (100.0%)**, **Land of Dusk (100.0%)**, Acacia Groove (89.0%), Castle of the Lost (75.5%), Forest of Spirits (72.0%) |
-| 16 | **Bamboo Forest (100.0%)**, **Valley of Tranquility (100.0%)**, Land of Dusk (85.7%), Acacia Groove (78.0%), Castle of the Lost (75.5%), Forest of Spirits (72.0%) |
-| 17 | **Valley of Tranquility (100.0%)**, Bamboo Forest (93.4%), Land of Dusk (85.7%), Refuge of the Ancients (84.2%), Acacia Groove (78.0%), Castle of the Lost (75.5%), Forest of Spirits (72.0%) |
-| 18 | **Forest of Spirits (100.0%)**, **Refuge of the Ancients (100.0%)**, **Castle of the Lost (100.0%)**, Bamboo Forest (93.4%), Ruinen Village (88.9%), Acacia Groove (78.0%), Land of Dusk (71.4%) |
-| 19–20 | **Forest of Spirits (100.0%)**, **Castle of the Lost (100.0%)**, Refuge of the Ancients (92.6%), Ruinen Village (88.9%), Acacia Groove (78.0%) |
-| 21 | **Forest of Spirits (100.0%)**, **Castle of the Lost (100.0%)**, **Ruinen Village (100.0%)**, Refuge of the Ancients (78.9%), Acacia Groove (78.0%) |
-| 22 | **Forest of Spirits (100.0%)**, **Castle of the Lost (100.0%)**, **Ruinen Village (100.0%)**, Refuge of the Ancients (78.9%), Navisko Town (78.9%) |
-| 23–24 | **Forest of Spirits (100.0%)**, **Castle of the Lost (100.0%)**, **Ruinen Village (100.0%)**, Refuge of the Ancients (78.9%), Navisko Town (78.9%), Cursed Land (73.7%) |
-| 25 | **Castle of the Lost (100.0%)**, **Ruinen Village (100.0%)**, Forest of Spirits (90.7%), Navisko Town (78.9%), Cursed Land (73.7%), Refuge of the Ancients (71.6%) |
-| 26–27 | **Ruinen Village (100.0%)**, Castle of the Lost (93.1%), Navisko Town (78.9%), Cursed Land (73.7%), Refuge of the Ancients (71.6%) |
-| 28 | **Ruinen Village (100.0%)**, Castle of the Lost (93.1%), Cursed Land (89.5%), Forgotten Land (85.6%), Navisko Town (78.9%), Refuge of the Ancients (71.6%) |
-| 29 | **Ruinen Village (100.0%)**, Cursed Land (89.5%), Forgotten Land (85.6%), Navisko Town (78.9%) |
-| 30–31 | **Navisko Town (100.0%)**, **Cursed Land (100.0%)**, **Forgotten Land (100.0%)**, Ruinen Village (77.8%) |
-| 32–33 | **Navisko Town (100.0%)**, **Cursed Land (100.0%)**, **Forgotten Land (100.0%)** |
-| 34–35 | **Cursed Land (100.0%)**, **Forgotten Land (100.0%)**, Navisko Town (84.2%) |
-| 36 | **Cursed Land (100.0%)**, **Forgotten Land (100.0%)** |
-| 37 | **Cursed Land (100.0%)**, **Forgotten Land (100.0%)**, Oasis (75.0%) |
-| 38 | **Forgotten Land (100.0%)**, Cursed Land (78.9%), Oasis (75.0%) |
-| 39–40 | **Forgotten Land (100.0%)**, Dungeon 1 (88.2%), Cursed Land (78.9%), Oasis (75.0%) |
-| 41–42 | **Forgotten Land (100.0%)**, Dungeon 1 (88.2%), Oasis (75.0%) |
-| 43 | **Forgotten Land (93.3%)**, Oasis (90.0%) |
-| 44–45 | **Oasis (90.0%)**, Forgotten Land (86.5%), Battlefield of the Ancients (70.6%) |
-| 46 | **Oasis (90.0%)**, Battlefield of the Ancients (82.4%) |
-| 47–48 | **Oasis (90.0%)**, Battlefield of the Ancients (82.4%), Mushroom Cave (72.7%) |
-| 49 | **Oasis (100.0%)**, Battlefield of the Ancients (82.4%), Mushroom Cave (72.7%) |
-| 50 | **Oasis (100.0%)**, Beehive Cave (92.0%), Mushroom Cave (86.4%), Battlefield of the Ancients (82.4%) |
-| 51 | **Beehive Cave (92.0%)**, Mushroom Cave (86.4%), Battlefield of the Ancients (82.4%), Oasis (80.0%) |
-| 52–53 | **Mushroom Cave (100.0%)**, **Beehive Cave (100.0%)**, Battlefield of the Ancients (82.4%), Oasis (80.0%) |
-| 54 | **Mushroom Cave (100.0%)**, **Beehive Cave (100.0%)**, Battlefield of the Ancients (82.4%), Dungeon 2 (81.2%) |
-| 55 | **Beehive Cave (96.0%)**, Mushroom Cave (95.5%) |
-| 56 | **Beehive Cave (96.0%)**, Mushroom Cave (95.5%), Battlefield of the Ancients (82.4%), Dungeon 2 (81.2%), Forbidden Land (71.4%) |
-| 57–60 | **Beehive Cave (96.0%)**, Mushroom Cave (95.5%), Battlefield of the Ancients (82.4%), Dungeon 2 (81.2%), Dungeon 3 (77.8%), Forbidden Land (71.4%) |
-| 61–62 | **Beehive Cave (96.0%)**, Dungeon 3 (88.9%), Forbidden Land (85.7%), Dungeon 2 (81.2%), Sanctuary of Darkness (75.0%), Mushroom Cave (72.7%) |
-| 63 | **Forbidden Land (100.0%)**, Dungeon 3 (88.9%), Sanctuary of Darkness (87.5%), Dungeon 2 (81.2%), Beehive Cave (80.0%) |
-| 64 | **Forbidden Land (100.0%)**, **Sanctuary of Darkness (100.0%)**, Dungeon 3 (88.9%), Dungeon 2 (81.2%), Beehive Cave (80.0%) |
-| 65 | **Forbidden Land (100.0%)**, **Sanctuary of Darkness (100.0%)** |
-| 66–68 | **Forbidden Land (85.7%)**, Sanctuary of Darkness (83.3%) |
-| 69–71 | **Cursed Temple 1 (91.1%)**, Forbidden Land (85.7%), Sanctuary of Darkness (75.0%) |
-| 72–74 | **Cursed Temple 1 (91.1%)**, Greedy Lake (85.0%), Cursed Temple 2 (77.7%), Sanctuary of Darkness (75.0%) |
-| 75–76 | **Cursed Temple 1 (100.0%)**, **Greedy Lake (100.0%)**, Railway of Chaos (84.0%), Cursed Temple 2 (77.7%), Sanctuary of Darkness (70.8%) |
-| 77 | **Greedy Lake (100.0%)**, Cursed Temple 1 (95.5%), Cursed Temple 2 (91.1%), Railway of Chaos (84.0%), Sanctuary of Darkness (70.8%) |
-| 78 | **Greedy Lake (100.0%)**, Cursed Temple 1 (95.5%), Cursed Temple 2 (91.1%), Railway of Chaos (84.0%) |
-| 79–82 | **Greedy Lake (100.0%)**, Cursed Temple 1 (95.5%), Heart of Perum (92.3%), Cursed Temple 2 (91.1%), Railway of Chaos (84.0%) |
-| 83 | **Heart of Perum (92.3%)**, Railway of Chaos (92.0%), Cursed Temple 2 (82.1%), Greedy Lake (80.0%) |
-| 84–85 | **Heart of Perum (92.3%)**, Railway of Chaos (92.0%), Cursed Temple 2 (82.1%) |
-| 86–88 | **Heart of Perum (92.3%)**, Railway of Chaos (92.0%), Gallubia Valley (76.2%) |
-| 89 | **Heart of Perum (92.3%)**, Railway of Chaos (92.0%), Gallubia Valley (90.5%), Frozen Sanctuary (87.5%), Kelvezu Cave (83.3%) |
-| 90–91 | **Railway of Chaos (100.0%)**, **Heart of Perum (100.0%)**, **Gallubia Valley (100.0%)**, Kelvezu Cave (90.7%), Frozen Sanctuary (87.5%) |
-| 92–93 | **Heart of Perum (100.0%)**, **Gallubia Valley (100.0%)**, Kelvezu Cave (90.7%), Frozen Sanctuary (87.5%), Railway of Chaos (84.0%) |
-| 94 | **Heart of Perum (100.0%)**, **Gallubia Valley (100.0%)**, **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)** |
-| 95 | **Heart of Perum (100.0%)**, **Gallubia Valley (100.0%)**, **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, Lost Island (90.0%) |
-| 96–97 | **Heart of Perum (100.0%)**, **Gallubia Valley (100.0%)**, **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, **Lost Island (100.0%)**, Lost Temple (77.8%) |
-| 98 | **Gallubia Valley (100.0%)**, **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, **Lost Island (100.0%)**, Lost Temple (77.8%), Heart of Perum (76.9%) |
-| 99 | **Gallubia Valley (100.0%)**, **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, **Lost Island (100.0%)**, Lost Temple (77.8%) |
-| 100–101 | **Gallubia Valley (100.0%)**, **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, **Lost Island (100.0%)**, **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)** |
-| 102 | **Gallubia Valley (100.0%)**, **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, **Lost Island (100.0%)**, **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, Endless Tower 3 (83.3%) |
-| 103–104 | **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, **Lost Island (100.0%)**, **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, Gallubia Valley (90.5%), Endless Tower 3 (83.3%) |
-| 105–106 | **Frozen Sanctuary (100.0%)**, **Kelvezu Cave (100.0%)**, **Lost Island (100.0%)**, **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, Endless Tower 3 (91.7%) |
-| 107 | **Lost Island (100.0%)**, **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, Kelvezu Cave (86.1%), Frozen Sanctuary (81.2%), Secret Laboratory (76.9%) |
-| 108–109 | **Lost Island (100.0%)**, **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)** |
-| 110–111 | **Lost Island (100.0%)**, **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)** |
-| 112 | **Lost Temple (100.0%)**, **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, Lost Island (90.0%) |
-| 113 | **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, Lost Temple (77.8%) |
-| 114 | **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)** |
-| 115 | **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, **Ancient Dungeon 2 (100.0%)**, **Ancient Dungeon 3 (100.0%)** |
-| 116–119 | **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Endless Tower 3 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, **Ancient Dungeon 2 (100.0%)**, **Ancient Dungeon 3 (100.0%)**, **Abyss of the Sea 2 (100.0%)** |
-| 120 | **Endless Tower 1 (100.0%)**, **Forgotten Temple 1 (100.0%)**, **Secret Laboratory (100.0%)**, **Endless Tower 2 (100.0%)**, **Forgotten Temple 2 (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, **Ancient Dungeon 2 (100.0%)**, **Ancient Dungeon 3 (100.0%)**, **Abyss of the Sea 2 (100.0%)**, **Bellatra (100.0%)**, Endless Tower 3 (83.3%) |
-| 121–123 | **Secret Laboratory (100.0%)**, **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, **Ancient Dungeon 2 (100.0%)**, **Ancient Dungeon 3 (100.0%)**, **Abyss of the Sea 2 (100.0%)**, **Bellatra (100.0%)**, Endless Tower 2 (83.3%), Forgotten Temple 2 (82.0%) |
-| 124 | **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, **Ancient Dungeon 2 (100.0%)**, **Ancient Dungeon 3 (100.0%)**, **Abyss of the Sea 2 (100.0%)**, **Bellatra (100.0%)**, Endless Tower 2 (83.3%), Forgotten Temple 2 (82.0%) |
-| 125 | **Ancient Dungeon 1 (100.0%)**, **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, **Ancient Dungeon 2 (100.0%)**, **Ancient Dungeon 3 (100.0%)**, **Abyss of the Sea 2 (100.0%)**, **Bellatra (100.0%)**, **Ancient Weapon (100.0%)**, Endless Tower 2 (83.3%), Forgotten Temple 2 (82.0%) |
-| 126–130 | **Cursed Temple 3 (100.0%)**, **Ice Mine 1 (100.0%)**, **Ancient Dungeon 2 (100.0%)**, **Ancient Dungeon 3 (100.0%)**, **Abyss of the Sea 2 (100.0%)**, **Bellatra (100.0%)**, **Ancient Weapon (100.0%)**, Ancient Dungeon 1 (83.3%) |
-| 131–135 | **Abyss of the Sea 2 (100.0%)**, **Bellatra (100.0%)**, **Ancient Weapon (100.0%)** |

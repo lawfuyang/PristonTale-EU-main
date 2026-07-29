@@ -1,7 +1,7 @@
 ﻿# Monster Spawn Reference
 
 > Auto-generated from `GameDB.dbo.MonsterList`, `GameDB.dbo.MapMonster`, and `GameDB.dbo.MapList`
-> Generated: 2026-07-21 21:26:56
+> Generated: 2026-07-29 17:29:17
 
 > **Zone Level** = median of all monster levels in the zone (same as zone-reference.md).
 
@@ -15,7 +15,7 @@
 | 4 | Rabie | 5 | Neutral | 30 | 2-3 | 10 | Road to the Wind(4) |
 | 4 | Tobie | 6 | Neutral | 50 | 3-5 | 20 | Road to the Wind(4) |
 | 4 | Zzangpy | 157 | Evil | 1500 | 10-25 | 20 | Boss@Road to the Wind(4), Boss@Garden of Freedom(5) |
-| 5 | Cuepy | 7 | Evil | 50 | 2-5 | 14 | Garden of Freedom(5) |
+| 5 | Cuepy | 7 | Evil | 30 | 2-5 | 14 | Garden of Freedom(5) |
 | 5 | Mush | 9 | Evil | 40 | 2-3 | 10 | Road to the Wind(4), Land of Dusk(13) |
 | 5 | Mushroom Ghost | 10 | Evil | 40 | 2-3 | 10 | Garden of Freedom(5), Acacia Groove(14) |
 | 5 | Zeldy | 11 | Evil | 36 | 2-4 | 10 | Road to the Wind(4) |
@@ -146,7 +146,7 @@
 | 98 | Turtle Cannon | 131 | Evil | 22500 | 190-240 | 860 | Frozen Sanctuary(98), Kelvezu Cave(98) |
 | 99 | Blizzard Giant | 135 | Evil | 26500 | 185-235 | 820 | Frozen Sanctuary(98), Kelvezu Cave(98) |
 | 100 | Chaos Cara | 127 | Evil | 30000 | 200-230 | 700 | Gallubia Valley(95), Kelvezu Cave(98) |
-| 100 | Draxos | 832 | Evil | 30000 | 712-834 | 2000 | Boss@Secret Laboratory(114) |
+| 100 | Draxos | 832 | Evil | 900000 | 712-834 | 2000 | Boss@Secret Laboratory(114) |
 | 100 | Grotesque | 110 | Evil | 15000 | 170-190 | 740 | Railway of Chaos(84) |
 | 100 | Iron Fist | 115 | Evil | 17000 | 160-210 | 820 | Heart of Perum(88) |
 | 100 | Kelvezu | 189 | Evil | 30000 | 832-896 | 3000 | Boss@Kelvezu Cave(98) |
@@ -185,20 +185,20 @@
 | 113 | LTechnician | 817 | Evil | 30000 | 200-440 | 1300 | Secret Laboratory(114) |
 | 114 | SLEngineer | 819 | Evil | 30000 | 200-440 | 1300 | Secret Laboratory(114) |
 | 115 | Atalanta Spirit | 143 | Evil | 19000 | 150-300 | 2000 | Endless Tower 2(115) |
-| 115 | Devil Shy | 834 | Evil | 30000 | 450-475 | 2000 | Boss@Endless Tower 3(111) |
+| 115 | Devil Shy | 834 | Evil | 450000 | 450-475 | 2000 | Boss@Endless Tower 3(111) |
 | 115 | Domicron | 346 | Evil | 16000 | 100-130 | 1350 | Forgotten Temple 2(115) |
 | 115 | Gorgon | 153 | Evil | 30000 | 225-450 | 1400 | Endless Tower 2(115) |
-| 115 | ISoldier | 820 | Evil | 30000 | 400-485 | 2000 | Secret Laboratory(114) |
+| 115 | ISoldier | 820 | Evil | 60000 | 400-485 | 2000 | Secret Laboratory(114) |
 | 115 | Knight Spirit | 145 | Evil | 22000 | 150-350 | 1200 | Endless Tower 2(115) |
 | 115 | Lunatic | 345 | Evil | 16000 | 100-130 | 1350 | Forgotten Temple 2(115) |
 | 115 | Magician Spirit | 146 | Evil | 19000 | 150-300 | 1000 | Endless Tower 2(115) |
 | 115 | Priestess Spirit | 149 | Evil | 25000 | 150-300 | 1000 | Endless Tower 2(115) |
 | 115 | Undead Maple | 811 | Evil | 30000 | 350-450 | 2300 | Endless Tower 3(111) |
 | 115 | Zombie Hulk | 348 | Evil | 16000 | 77-100 | 1350 | Forgotten Temple 2(115), Ancient Dungeon 1(120) |
-| 117 | IBomber | 821 | Evil | 30000 | 200-400 | 1500 | Secret Laboratory(114) |
+| 117 | IBomber | 821 | Evil | 60000 | 200-400 | 1500 | Secret Laboratory(114) |
 | 117 | Xetan | 812 | Evil | 26000 | 350-450 | 2000 | Endless Tower 3(111) |
-| 118 | IElite | 823 | Evil | 30000 | 400-550 | 2500 | Secret Laboratory(114) |
-| 118 | LGuardian | 822 | Evil | 30000 | 400-550 | 2000 | Secret Laboratory(114) |
+| 118 | IElite | 823 | Evil | 90000 | 400-550 | 2500 | Secret Laboratory(114) |
+| 118 | LGuardian | 822 | Evil | 60000 | 400-550 | 2000 | Secret Laboratory(114) |
 | 120 | Ancient Archer | 414 | Evil | 18000 | 130-185 | 1400 | Ancient Dungeon 1(120), Ancient Dungeon 2(122), Ancient Dungeon 3(122) |
 | 120 | Ancient Explorer | 410 | Evil | 19000 | 140-180 | 1400 | Ancient Dungeon 1(120), Ancient Dungeon 2(122), Ancient Dungeon 3(122) |
 | 120 | Argos | 405 | Evil | 21000 | 150-180 | 1400 | Ancient Dungeon 1(120) |
@@ -213,23 +213,23 @@
 | 120 | Niken | 441 | Evil | 25000 | 240-390 | 1000 | Cursed Temple 3(120) |
 | 120 | Seal Crasher | 396 | Evil | 1000 | - | 900 | Ice Mine 1(120) |
 | 120 | Tarantulika | 401 | Evil | 30000 | 350-400 | 2100 | Ice Mine 1(120) |
-| 120 | Tulla | 404 | Evil | 30000 | 520-690 | 1700 | Boss@Ice Mine 1(120) |
+| 120 | Tulla | 404 | Evil | 600000 | 520-690 | 1700 | Boss@Ice Mine 1(120) |
 | 120 | Undead Manager | 402 | Evil | 29000 | 300-400 | 1800 | Ice Mine 1(120) |
 | 120 | Undead Miner | 403 | Evil | 26000 | 350-400 | 1500 | Ice Mine 1(120) |
 | 120 | Undead Slave | 411 | Evil | 19000 | 145-170 | 1400 | Ancient Dungeon 1(120), Ancient Dungeon 2(122), Ancient Dungeon 3(122) |
 | 125 | Ancient Ranger | 413 | Evil | 20000 | 180-240 | 1600 | Ancient Dungeon 2(122), Ancient Dungeon 3(122) |
 | 125 | Ancient Slave | 412 | Evil | 21000 | 190-230 | 1600 | Ancient Dungeon 2(122), Ancient Dungeon 3(122) |
 | 125 | Ancient Slayer | 447 | Evil | 30000 | 250-320 | 1700 | Ancient Dungeon 2(122), Ancient Dungeon 3(122) |
-| 126 | Elite Arhdyra | 848 | Evil | 30000 | 570-705 | 2500 | Abyss of the Sea 2(126) |
-| 126 | Elite Sathla | 847 | Evil | 30000 | 508-630 | 2100 | Abyss of the Sea 2(126) |
+| 126 | Elite Arhdyra | 848 | Evil | 210000 | 570-705 | 2500 | Abyss of the Sea 2(126) |
+| 126 | Elite Sathla | 847 | Evil | 240000 | 508-630 | 2100 | Abyss of the Sea 2(126) |
 | 130 | Sod Spawner | 2 | Evil | 0 | - | 0 | Bellatra(130) |
-| 135 | Acero | 417 | Evil | 30000 | 333-433 | 1600 | Ancient Weapon(135) |
-| 135 | Bomber | 418 | Evil | 30000 | 400-520 | 1600 | Ancient Weapon(135) |
-| 135 | Chalybs | 420 | Evil | 30000 | 425-525 | 2500 | Ancient Weapon(135) |
-| 135 | Death Slave | 419 | Evil | 30000 | 400-520 | 1600 | Ancient Weapon(135) |
-| 135 | Greedy | 422 | Evil | 30000 | 712-834 | 1600 | Boss@Ancient Weapon(135) |
-| 135 | Nihil | 416 | Evil | 30000 | 333-433 | 1600 | Ancient Weapon(135) |
-| 135 | Psycho Soldier | 421 | Evil | 30000 | 400-550 | 2000 | Ancient Weapon(135) |
+| 135 | Acero | 417 | Evil | 90000 | 333-433 | 1600 | Ancient Weapon(135) |
+| 135 | Bomber | 418 | Evil | 90000 | 400-520 | 1600 | Ancient Weapon(135) |
+| 135 | Chalybs | 420 | Evil | 120000 | 425-525 | 2500 | Ancient Weapon(135) |
+| 135 | Death Slave | 419 | Evil | 60000 | 400-520 | 1600 | Ancient Weapon(135) |
+| 135 | Greedy | 422 | Evil | 1200000 | 712-834 | 1600 | Boss@Ancient Weapon(135) |
+| 135 | Nihil | 416 | Evil | 90000 | 333-433 | 1600 | Ancient Weapon(135) |
+| 135 | Psycho Soldier | 421 | Evil | 60000 | 400-550 | 2000 | Ancient Weapon(135) |
 
 ## Monsters without Zone Spawns
 
@@ -328,8 +328,8 @@ They may be event monsters, summons, crystals, or unused entries.
 | 80 | Doom Lord_SOD | 799 | Evil | 15000 | 200-250 | 1200 |
 | 80 | Iron Fist_SOD | 787 | Evil | 5000 | 120-180 | 800 |
 | 80 | Lizzard | 178 | Evil | 4500 | 112-168 | 680 |
-| 80 | Master Raymon | 197 | Neutral | 7000 | 74-95 | 700 |
-| 80 | Master Verkan | 198 | Neutral | 6000 | 72-94 | 750 |
+| 80 | Master Raymon | 197 | Neutral | 14000 | 74-95 | 700 |
+| 80 | Master Verkan | 198 | Neutral | 18000 | 72-94 | 750 |
 | 80 | Mountain_SOD | 786 | Evil | 5000 | 100-140 | 800 |
 | 80 | RaSha_SOD | 801 | Evil | 15000 | 300-350 | 1600 |
 | 80 | Ricarten Militia | 204 | Evil | 250 | 85-75 | 620 |
@@ -340,7 +340,7 @@ They may be event monsters, summons, crystals, or unused entries.
 | 81 | Iron Guard_Crystal | 228 | Evil | 7600 | 192-232 | 740 |
 | 84 | Berseker | 101 | Evil | 3800 | 128-140 | 600 |
 | 85 | Golden Orbit | 315 | Evil | 700 | 11-32 | 300 |
-| 85 | Mini Babel | 304 | Evil | 30000 | 267-307 | 450 |
+| 85 | Mini Babel | 304 | Evil | 60000 | 267-307 | 450 |
 | 85 | Vampiric Bee | 107 | Evil | 1500 | 90-100 | 600 |
 | 86 | Horropion | 179 | Evil | 15000 | 200-240 | 1000 |
 | 86 | Horropion_Crystal | 223 | Evil | 4200 | 158-211 | 500 |
@@ -364,7 +364,7 @@ They may be event monsters, summons, crystals, or unused entries.
 | 95 | Desert Gorgon | 335 | Evil | 5000 | 112-144 | 900 |
 | 95 | Desert Lizard | 336 | Evil | 5000 | 112-144 | 900 |
 | 95 | Desert Ship | 334 | Evil | 5000 | 112-144 | 900 |
-| 95 | Desert Surger | 858 | Evil | 28000 | 125-250 | 600 |
+| 95 | Desert Surger | 858 | Evil | 140000 | 125-250 | 600 |
 | 95 | Desert Turtle | 337 | Evil | 5000 | 112-144 | 900 |
 | 95 | Hell Hound_SOD | 794 | Evil | 8000 | 150-200 | 1200 |
 | 95 | Sazha | 338 | Evil | 18000 | 320-480 | 1350 |
@@ -378,22 +378,22 @@ They may be event monsters, summons, crystals, or unused entries.
 | 100 | Aprisioned Ice Goblin | 451 | Evil | 1500 | 80-80 | 500 |
 | 100 | Aprisioned Iron Guard | 449 | Evil | 1000 | 80-80 | 500 |
 | 100 | Aprisioned Morgon | 450 | Evil | 1200 | 80-80 | 500 |
-| 100 | Castle Door | 199 | Evil | 30000 | - | 1500 |
+| 100 | Castle Door | 199 | Evil | 180000 | - | 1500 |
 | 100 | Crystal Tower | 454 | Evil | 25000 | - | 0 |
 | 100 | Desert Atalanta | 330 | Evil | 10000 | 128-176 | 800 |
 | 100 | Desert Fighter | 327 | Evil | 10000 | 128-172 | 900 |
 | 100 | Desert Knight | 331 | Evil | 10000 | 128-152 | 1000 |
-| 100 | Fire Tower | 200 | Evil | 25000 | 192-260 | 900 |
+| 100 | Fire Tower | 200 | Evil | 375000 | 192-260 | 900 |
 | 100 | Fury | 182 | Evil | 30000 | 660-813 | 1250 |
 | 100 | Guardian King_Crystal | 237 | Evil | 15000 | 424-544 | 1500 |
 | 100 | Guardian Saint_Crystal | 236 | Evil | 15000 | 384-512 | 1500 |
 | 100 | Ice Elemental | 513 | Evil | 15000 | 56-144 | 300 |
-| 100 | Ice Tower | 201 | Evil | 25000 | 192-260 | 900 |
-| 100 | Lightning Tower | 202 | Evil | 25000 | 192-260 | 900 |
+| 100 | Ice Tower | 201 | Evil | 375000 | 192-260 | 900 |
+| 100 | Lightning Tower | 202 | Evil | 375000 | 192-260 | 900 |
 | 100 | Mechanic_Crystal | 844 | Evil | 6000 | 106-164 | 3000 |
 | 100 | Mini Kelvezu | 305 | Evil | 30000 | 320-368 | 3000 |
 | 100 | Mini Valento | 303 | Evil | 30000 | 467-507 | 2000 |
-| 100 | Neutral Tower | 203 | Evil | 25000 | - | 800 |
+| 100 | Neutral Tower | 203 | Evil | 375000 | - | 800 |
 | 100 | Royal Bless Guard | 206 | Evil | 1000 | 200-230 | 920 |
 | 100 | Test Fire | 248 | Evil | 30000 | 160-160 | 0 |
 | 100 | Test Ice | 247 | Evil | 30000 | 160-160 | 0 |
@@ -402,7 +402,7 @@ They may be event monsters, summons, crystals, or unused entries.
 | 100 | Test Organic | 245 | Evil | 30000 | 160-160 | 0 |
 | 100 | Test Poison | 249 | Evil | 30000 | 160-160 | 0 |
 | 100 | Test Subject 1 | 244 | Evil | 30000 | 160-160 | 0 |
-| 100 | Valhalla Tower | 207 | Evil | 25000 | 208-310 | 1500 |
+| 100 | Valhalla Tower | 207 | Evil | 1025000 | 208-310 | 1500 |
 | 102 | Cursed Spider_Crystal | 235 | Evil | 1500 | 275-290 | 1100 |
 | 102 | Hell Hound_Crystal | 503 | Evil | 10000 | 150-190 | 600 |
 | 102 | King Spider_Crystal | 234 | Evil | 15000 | 245-270 | 1100 |
@@ -420,8 +420,8 @@ They may be event monsters, summons, crystals, or unused entries.
 | 105 | Killer Bee | 842 | Normal | 28000 | 250-450 | 2000 |
 | 105 | Majesty Mama Krika | 838 | Normal | 30000 | 400-550 | 2000 |
 | 105 | Mokova | 156 | Evil | 13500 | 210-260 | 800 |
-| 105 | Queen Bee | 843 | Normal | 28000 | 250-300 | 600 |
-| 105 | Rage of the Desert | 857 | Evil | 28000 | 250-450 | 600 |
+| 105 | Queen Bee | 843 | Normal | 980000 | 250-300 | 600 |
+| 105 | Rage of the Desert | 857 | Evil | 980000 | 250-450 | 600 |
 | 105 | Seto_Crystal | 502 | Evil | 10000 | 170-210 | 600 |
 | 106 | Bloody King | 302 | Evil | 30000 | 370-440 | 1000 |
 | 106 | Setonian | 185 | Evil | 30000 | 495-575 | 1400 |
@@ -429,60 +429,60 @@ They may be event monsters, summons, crystals, or unused entries.
 | 110 | B-Machine | 355 | Neutral | 20000 | 100-200 | 800 |
 | 110 | Desert Scorpion | 339 | Evil | 20000 | 220-320 | 1350 |
 | 110 | Gladiator | 344 | Evil | 20000 | 320-340 | 1350 |
-| 110 | Igniculus | 897 |  |  | - |  |
-| 110 | Lord Babel | 804 | Evil | 20000 | 250-300 | 800 |
+| 110 | Igniculus | 897 |  | 55000 | - |  |
+| 110 | Lord Babel | 804 | Evil | 100000 | 250-300 | 800 |
 | 110 | Lord Shaman | 350 | Evil | 30000 | 320-480 | 1400 |
 | 110 | Mechanician Spirit_Crystal | 507 | Evil | 25000 | 210-320 | 1100 |
 | 110 | MechanicKing_Crystal | 845 | Evil | 25000 | 320-390 | 4000 |
 | 110 | Pikeman Spirit_Crystal | 506 | Evil | 22000 | 200-270 | 1000 |
-| 112 | Lava Insec | 898 |  |  | - |  |
-| 114 | Lava Archer | 899 |  |  | - |  |
+| 112 | Lava Insec | 898 |  | 56000 | - |  |
+| 114 | Lava Archer | 899 |  | 57000 | - |  |
 | 115 | Atalanta Spirit_Crystal | 504 | Evil | 26000 | 240-390 | 1000 |
 | 115 | Gorgonyte | 188 | Evil | 30000 | 400-500 | 1800 |
 | 115 | Hell Beast | 349 | Evil | 22000 | 340-380 | 1350 |
-| 116 | Lava Brawler | 900 |  |  | - |  |
-| 118 | Draxos Guard | 833 | Evil | 30000 | 400-550 | 2500 |
-| 118 | Lava Giant | 901 |  |  | - |  |
-| 119 | Dey | 854 | Evil | 30000 | 520-676 | 1800 |
-| 119 | Gurkob | 852 | Evil | 30000 | 520-660 | 1700 |
-| 119 | Lava Golem | 902 |  |  | - |  |
-| 120 | Flamo | 903 |  |  | - |  |
+| 116 | Lava Brawler | 900 |  | 58000 | - |  |
+| 118 | Draxos Guard | 833 | Evil | 90000 | 400-550 | 2500 |
+| 118 | Lava Giant | 901 |  | 59000 | - |  |
+| 119 | Dey | 854 | Evil | 90000 | 520-676 | 1800 |
+| 119 | Gurkob | 852 | Evil | 90000 | 520-660 | 1700 |
+| 119 | Lava Golem | 902 |  | 59500 | - |  |
+| 120 | Flamo | 903 |  | 60000 | - |  |
 | 120 | Fury Worm | 308 | Evil | 30000 | 180-330 | 650 |
-| 120 | Gaius | 297 | Evil | 30000 | 200-230 | 500 |
+| 120 | Gaius | 297 | Evil | 60000 | 200-230 | 500 |
 | 120 | Ice Serpent_Crystal | 511 | Evil | 30000 | 380-500 | 1500 |
 | 120 | King Babel | 190 | Evil | 30000 | 333-458 | 4000 |
-| 120 | King Fury | 805 | Evil | 30000 | 700-800 | 2000 |
-| 120 | Koon | 851 | Evil | 30000 | 500-640 | 1800 |
+| 120 | King Fury | 805 | Evil | 570000 | 700-800 | 2000 |
+| 120 | Koon | 851 | Evil | 90000 | 500-640 | 1800 |
 | 120 | Lord Hest | 444 | Evil | 30000 | 400-530 | 1300 |
 | 120 | Lord Rampage | 155 | Evil | 28000 | 570-630 | 3600 |
-| 120 | MechanicBoss_Crystal | 846 | Evil | 30000 | 490-580 | 6000 |
+| 120 | MechanicBoss_Crystal | 846 | Evil | 60000 | 490-580 | 6000 |
 | 120 | Mine Bat_Crystal | 510 | Evil | 30000 | 360-430 | 1500 |
 | 120 | Mini Tulla | 446 | Evil | 30000 | 400-570 | 1700 |
 | 120 | Mummified Pharaoh | 436 | Evil | 30000 | 310-390 | 1100 |
 | 120 | Released Fury | 324 | Evil | 30000 | 333-417 | 1000 |
 | 120 | Tarantulika_Crystal | 509 | Evil | 30000 | 400-510 | 1400 |
 | 120 | Undead Miner_Crystal | 508 | Evil | 30000 | 400-510 | 1500 |
-| 121 | Faugn | 853 | Evil | 30000 | 494-585 | 1800 |
-| 122 | Elite Lava Giant | 904 |  |  | - |  |
-| 122 | Shogoth | 850 | Evil | 30000 | 400-520 | 1600 |
-| 123 | Arhdyra | 855 | Evil | 30000 | 520-650 | 2300 |
-| 124 | Elite Lava Golem | 905 |  |  | - |  |
-| 124 | Sathla | 849 | Evil | 30000 | 468-560 | 1800 |
+| 121 | Faugn | 853 | Evil | 120000 | 494-585 | 1800 |
+| 122 | Elite Lava Giant | 904 |  | 61000 | - |  |
+| 122 | Shogoth | 850 | Evil | 120000 | 400-520 | 1600 |
+| 123 | Arhdyra | 855 | Evil | 150000 | 520-650 | 2300 |
+| 124 | Elite Lava Golem | 905 |  | 62000 | - |  |
+| 124 | Sathla | 849 | Evil | 150000 | 468-560 | 1800 |
 | 125 | Ancient Rose | 495 | Evil | 30000 | 292-333 | 1600 |
 | 125 | Mummified Slave | 437 | Evil | 1400 | 36-50 | 600 |
-| 125 | Yagditha | 429 | Evil | 30000 | 477-646 | 3000 |
+| 125 | Yagditha | 429 | Evil | 180000 | 477-646 | 3000 |
 | 130 | Cydonian Knight | 438 | Evil | 5000 | 100-110 | 780 |
 | 130 | Slayer | 448 | Evil | 30000 | 200-240 | 1700 |
-| 135 | Ancient Champion | 408 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Ancient Lord | 409 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Elite Guardian | 415 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Lizard Commander | 431 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Lizard Doctor | 432 | Evil | 30000 | 333-433 | 1600 |
-| 135 | Lizard Elder | 433 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Lizard Papa | 434 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Lizard Soldier | 435 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Old Mama Krika | 430 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Soldier 1 | 406 | Evil | 30000 | 400-520 | 1600 |
-| 135 | Soldier 2 | 407 | Evil | 30000 | 400-520 | 1600 |
+| 135 | Ancient Champion | 408 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Ancient Lord | 409 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Elite Guardian | 415 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Lizard Commander | 431 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Lizard Doctor | 432 | Evil | 90000 | 333-433 | 1600 |
+| 135 | Lizard Elder | 433 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Lizard Papa | 434 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Lizard Soldier | 435 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Old Mama Krika | 430 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Soldier 1 | 406 | Evil | 90000 | 400-520 | 1600 |
+| 135 | Soldier 2 | 407 | Evil | 90000 | 400-520 | 1600 |
 
 
