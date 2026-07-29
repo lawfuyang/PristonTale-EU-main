@@ -210,26 +210,29 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 
 	// Skip potions, crystals, cores, premium items in LootMode
 	if ( eItemBase == ITEMBASE_Potion || eItemBase == ITEMBASE_Crystal || eItemBase == ITEMBASE_Core || eItemBase == ITEMBASE_Premium )
-		return false;
-
-	// Skip monster crystals & respec jewels
-	if ( eItemType == ITEMTYPE_MonsterCrystal || eItemType == ITEMTYPE_Respec)
 	{
-		if ( LOOTSERVER->bLootDebug )
+		if (LOOTSERVER->bLootDebug)
 		{
-			auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
-			INFO("IsItemAcceptableInLootMode: Rejecting monster crystal & Respec jewel %s",
-				pDef ? pDef->sItem.szItemName : "unknown");
+			INFO("IsItemAcceptableInLootMode: Skipped potion, crystal, core or premium");
 		}
 		return false;
 	}
 
 	auto pDef = ITEMSERVER->FindItemDefByCode( dwItemCode );
-	if ( !pDef )
+	if (!pDef)
+	{
+		if (LOOTSERVER->bLootDebug)
+		{
+			INFO("IsItemAcceptableInLootMode: Rejecting unknown item code %d", dwItemCode);
+		}
+		return false;
+	}
+
+	if ( eItemType == ITEMTYPE_MonsterCrystal || eItemType == ITEMTYPE_Respec || eItemType == ITEMTYPE_ForceOrb)
 	{
 		if ( LOOTSERVER->bLootDebug )
 		{
-			INFO("IsItemAcceptableInLootMode: Rejecting unknown item code %d", dwItemCode);
+			INFO("IsItemAcceptableInLootMode: Rejecting monster crystal, Respec or ForceOrb %s", pDef->sItem.szItemName);
 		}
 		return false;
 	}
@@ -243,8 +246,7 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 	{
 		if ( LOOTSERVER->bLootDebug )
 		{
-			INFO("IsItemAcceptableInLootMode: Rejecting item %s (type 0x%08X) for class %d (signature mismatch)",
-				pDef->sItem.szItemName, eItemType, iClass);
+			INFO("IsItemAcceptableInLootMode: Rejecting item %s (type 0x%08X) for class %d (signature mismatch)", pDef->sItem.szItemName, eItemType, iClass);
 		}
 		return false;
 	}
@@ -261,14 +263,17 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 		{
 			if ( LOOTSERVER->bLootDebug )
 			{
-				INFO("IsItemAcceptableInLootMode: Rejecting item %s (code 0x%08X < equipped code 0x%08X)",
-					pDef->sItem.szItemName, dwItemCode, (DWORD)eEquipped);
+				INFO("IsItemAcceptableInLootMode: Rejecting item %s (code 0x%08X < equipped code 0x%08X)", pDef->sItem.szItemName, dwItemCode, (DWORD)eEquipped);
 			}
 			return false;
 		}
 
-		// Same or higher code — check inventory for any LEGENDARY copy
+		// Same or higher code — count LEGENDARY copies in inventory.
+		// Rings allow up to 2 copies (two ring slots); everything else allows 1.
 		DWORD eItemType = pDef->sItem.sItemID.ToItemType();
+		const bool bIsRing = (eItemType == ITEMTYPE_Ring || eItemType == ITEMTYPE_Ring2);
+		const int kMaxAllowed = bIsRing ? 2 : 1;
+		int legendaryCount = 0;
 		for ( int i = 0; i < 316; i++ )
 		{
 			DropItemData& dropItem = pcUser->pcUserData->sIntentoryItems[i];
@@ -280,7 +285,7 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 			if ( eInvType != eItemType )
 				continue;
 
-			// Only reject if we find a LEGENDARY copy of this exact item code
+			// Only count LEGENDARY copies of this exact item code
 			if ( (DWORD)dropItem.iItemID != dwItemCode )
 				continue;
 
@@ -290,18 +295,20 @@ bool LootServer::IsItemAcceptableInLootMode( DWORD dwItemCode, ECharacterClass i
 			char szCode[128] = { 0 };
 			STRINGFORMAT( szCode, "%d@%d", dropItem.iChk1, dropItem.iChk2 );
 
-			if ( ITEMSERVER->OnLoadItemData( &itemLoadData, szCode ) &&
-				 itemLoadData.sItem.eRarity >= EItemRarity::LEGENDARY )
+			if (ITEMSERVER->OnLoadItemData(&itemLoadData, szCode) && itemLoadData.sItem.eRarity >= EItemRarity::LEGENDARY)
 			{
-				if ( LOOTSERVER->bLootDebug )
-				{
-					INFO("IsItemAcceptableInLootMode: Rejecting item %s (already own LEGENDARY copy)",
-						pDef->sItem.szItemName);
-				}
-				return false;
+				legendaryCount++;
 			}
 		}
-		// No LEGENDARY copy found → accept
+
+		if ( legendaryCount >= kMaxAllowed )
+		{
+			if ( LOOTSERVER->bLootDebug )
+			{
+				INFO("IsItemAcceptableInLootMode: Rejecting item %s (already own %d LEGENDARY copy(s), max %d)", pDef->sItem.szItemName, legendaryCount, kMaxAllowed);
+			}
+			return false;
+		}
 	}
 
 	return true;
@@ -336,8 +343,6 @@ EItemID LootServer::GetEquippedItemCode( DefinitionItem* pDef, User* pcUser )
 	}
 }
 
-static const int kMaxRetries = 1000;
-
 LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonsterId, User* pcUser )
 {
 	//Only for game-server
@@ -355,57 +360,38 @@ LootServer::BaseDropDefinition * LootServer::GetRandomDropDefinition( int iMonst
 
 	MonsterDropTable * monsterDropTable = &mDropTable[iMonsterId];
 
-	// LOOT_MODE: filter gold/non-class drops at the definition level.
-	// Retry up to kMaxRetries times to find a suitable drop definition.
+	// LOOT_MODE: iterate through all drop definitions and return the first
+	// one with at least one item acceptable for this class.
 	if ( LOOT_MODE && pcUser )
 	{
 		ECharacterClass iPlayerClass = pcUser->pcUserData->sCharacterData.iClass;
 
-		for ( int iRetry = 0; iRetry < kMaxRetries; iRetry++ )
+		for ( BaseDropDefinition * v : monsterDropTable->vDropDefinitions )
 		{
-			int iRand = Dice::RandomI( 0, monsterDropTable->iTotalDropChance );
-			int iTotal = 0;
-
-			for ( BaseDropDefinition * v : monsterDropTable->vDropDefinitions )
+			// Skip gold & air entirely
+			if ( v->eDropType == DROPTYPE_GOLD || v->eDropType == DROPTYPE_AIR )
 			{
-				iTotal += v->iDropChance;
-				if ( iRand <= iTotal )
+				if ( LOOTSERVER->bLootDebug )
 				{
-					// Skip gold & air entirely
-					if ( v->eDropType == DROPTYPE_GOLD || v->eDropType == DROPTYPE_AIR )
-					{
-						break;
-					}
+					INFO("GetRandomDropDefinition: Skip gold or air");
+				}
+				continue;
+			}
 
-					// Item group: check if at least one item is usable by this class
-					if ( v->eDropType == DROPTYPE_ITEMS )
+			// Item group: check if at least one item is usable by this class
+			if ( v->eDropType == DROPTYPE_ITEMS )
+			{
+				ItemDropDefinition* itemDropDef = reinterpret_cast<ItemDropDefinition*>(v);
+				for ( DWORD dwCode : itemDropDef->vItemCodes )
+				{
+					if ( IsItemAcceptableInLootMode( dwCode, iPlayerClass, pcUser ) )
 					{
-						ItemDropDefinition* itemDropDef = reinterpret_cast<ItemDropDefinition*>(v);
-						for ( DWORD dwCode : itemDropDef->vItemCodes )
-						{
-							if ( IsItemAcceptableInLootMode( dwCode, iPlayerClass, pcUser ) )
-							{
-								if ( LOOTSERVER->bLootDebug )
-								{
-									INFO("GetRandomDropDefinition: Found usable item for monster in LOOT_MODE: %s", ITEMSERVER->FindItemDefByCode(dwCode)->sItem.szItemName);
-								}
-								return v; // found a usable item in this group
-							}
-						}
-
-						// No usable items in this group — retry
 						if ( LOOTSERVER->bLootDebug )
 						{
-							INFO("GetRandomDropDefinition: No usable items in group for monster in LOOT_MODE, retrying...");
+							INFO("GetRandomDropDefinition: Found usable item for monster in LOOT_MODE: %s", ITEMSERVER->FindItemDefByCode(dwCode)->sItem.szItemName);
 						}
-						break;
+						return v;
 					}
-
-					if ( LOOTSERVER->bLootDebug )
-					{
-						INFO("GetRandomDropDefinition: Non-item drop");
-					}
-					break; // Non-item drop (shouldn't happen in LOOT_MODE), retry
 				}
 			}
 		}
@@ -539,16 +525,13 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 	{
 		ItemDropDefinition* itemDropDef = (ItemDropDefinition*)baseDropDefinition;
 
-		// In LOOT_MODE, retry until we land on an acceptable item (not potion/crystal/core)
+		// In LOOT_MODE, iterate through all items and return the first acceptable one.
 		DWORD dwItemCode = 0;
 		if ( LOOT_MODE && pcUser )
 		{
 			int iPlayerClass = pcUser->pcUserData->sCharacterData.iClass;
-			for ( int iRetry = 0; iRetry < kMaxRetries; iRetry++ )
+			for ( DWORD dwCandidate : itemDropDef->vItemCodes )
 			{
-				int count = itemDropDef->vItemCodes.size();
-				int randomIndex = Dice::RandomI( 0, count - 1 );
-				DWORD dwCandidate = itemDropDef->vItemCodes[randomIndex];
 				if ( IsItemAcceptableInLootMode( dwCandidate, (ECharacterClass)iPlayerClass, pcUser ) )
 				{
 					dwItemCode = dwCandidate;
