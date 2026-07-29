@@ -1369,6 +1369,17 @@ void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 	};
 	static const int kOneHourSeconds = 3600;
 
+	static const std::unordered_set<int> kDoubleRangeIDs = {
+		Pikeman_Tornado_Range,
+		Pikeman_VenomSpear_Range,
+
+		Archer_BombShot_Area,
+		Archer_ArrowofRage_Area,
+		Archer_ElementalShot_LightningRange_New,
+		Archer_Perforation_AddShotRange,
+		Archer_Perforation_AttackWidth_New
+	};
+
 	UINT uPosition = 0;
 
 	for ( int i = 0; i < container->iCount; i++ )
@@ -1388,8 +1399,8 @@ void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 			}
 		}
 
-		// double tornado & venom spear range
-		if (skillArrayPointerId == Pikeman_Tornado_Range || skillArrayPointerId == Pikeman_VenomSpear_Range)
+		// 2x some skills' range/radius
+		if (kDoubleRangeIDs.find(skillArrayPointerId) != kDoubleRangeIDs.end())
 		{
 			for ( int k = 0; k < 10; k++ )
 			{
