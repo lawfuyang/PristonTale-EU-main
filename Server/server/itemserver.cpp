@@ -1905,12 +1905,12 @@ void ItemServer::CreateItem1( User * pcUser, EItemID eItem, EItemSource eItemSou
 
 }
 
-void ItemServer::CreatePerfectItem( Item * psOut, DefinitionItem * psIn, EItemSource eItemSource, int iSpeck, int iSpecAtkRating, int iAgeLevel )
+void ItemServer::CreatePerfectItem( Item * psOut, DefinitionItem * psIn, EItemSource eItemSource, int iSpeck, int iSpecAtkRating, int iAgeLevel, const EItemRarity itemRarity )
 {
 	*( UINT* )0x8B70264 = 1;
 	*( UINT* )0x8B70268 = iSpeck;
 
-	CreateItem( psOut, psIn, eItemSource, iSpeck, iSpecAtkRating, iAgeLevel, EItemRarity::NONE, TRUE );
+	CreateItem( psOut, psIn, eItemSource, iSpeck, iSpecAtkRating, iAgeLevel, itemRarity, TRUE );
 
 	*( UINT* )0x8B70264 = 0;
 	*( UINT* )0x8B70268 = 0;
@@ -5214,6 +5214,16 @@ void ItemServer::SetItemFixes(DefinitionItem* itemDef, EItemRarity itemRarity, B
 		}
 	}
 
+
+	// For perfect items in LOOT_MODE, guarantee a prefix & suffix if any eligible ones exist.
+	// Pick the last (highest-ID) entry when multiple are available.
+	if ( isPerfect && LOOT_MODE )
+	{
+		if ( ReturnItemPrefix->iID == 0 && CurrentPrefixes.size() > 0 )
+			ReturnItemPrefix = CurrentPrefixes.back();
+		if ( ReturnItemSuffix->iID == 0 && CurrentSuffixes.size() > 0 )
+			ReturnItemSuffix = CurrentSuffixes.back();
+	}
 
 	//Apply Stat Changes
 	if ( ReturnItemPrefix->iID != 0 && !(isPerfect) )

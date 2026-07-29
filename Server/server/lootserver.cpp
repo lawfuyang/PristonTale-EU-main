@@ -609,16 +609,8 @@ BOOL LootServer::GetRandomItemForMonster(UnitData * pcUnitData, User* pcUser, It
 
 			if (LOOT_MODE && pcUser)
 			{
-				ITEMSERVER->CreatePerfectItem(psItem, pDefItem, eItemSource, iPlayerClass);
-
-				// Force LEGENDARY rarity for all LOOT_MODE drops
-				if (ITEMSERVER->IsItemAbleToHaveRarity(psItem) && psItem->eRarity < EItemRarity::LEGENDARY)
-				{
-					ServerCore::FixItemBasedOnRarity(psItem, psItem->eRarity, TRUE);     // reverse current rarity
-					psItem->eRarity = EItemRarity::LEGENDARY;
-					ServerCore::FixItemBasedOnRarity(psItem, EItemRarity::LEGENDARY, FALSE); // apply legendary
-				}
-
+				const int kSpecAtkRating = 1; // perfect atk rating div
+				ITEMSERVER->CreatePerfectItem(psItem, pDefItem, eItemSource, iPlayerClass, kSpecAtkRating, 0, EItemRarity::LEGENDARY);
 				ITEMSERVER->ReformItem(psItem);
 			}
 			else

@@ -271,7 +271,7 @@ public:
 	void										CreateItem( Item * psItem, DefinitionItem * psDefItem, EItemSource eItemSource, int iSpeck = 0, int iSpecAtkRating = 0, int iAgeLevel = 0, const EItemRarity itemRarity = EItemRarity::NONE);
 #endif
 	void										CreateItem1( User * pcUser, EItemID eItem, EItemSource eItemSource, int iCount );
-	void										CreatePerfectItem( Item * psOut, DefinitionItem * psIn, EItemSource eItemSource, int iSpeck = 0, int iSpecAtkRating = 0, int iAgeLevel = 0 );
+	void										CreatePerfectItem( Item * psOut, DefinitionItem * psIn, EItemSource eItemSource, int iSpeck = 0, int iSpecAtkRating = 0, int iAgeLevel = 0, const EItemRarity itemRarity = EItemRarity::NONE );
 
 
 	StatModifier								GetNSStatMod(EItemType iItemType);
