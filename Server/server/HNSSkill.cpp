@@ -1358,6 +1358,7 @@ void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 		Pikeman_Vanish_Duration,
 		Pikeman_AssassinsEye_Duration,
 		Pikeman_Vague_Duration,
+		Pikeman_VenomSpear_PoisonDurationSec_New,
 
 		// Shaman
 		Shaman_ChasingHunt_Duration,
@@ -1384,6 +1385,15 @@ void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 			{
 				if ( data->iSkillValues[k] > 0 && data->iSkillValues[k] < kOneHourSeconds )
 					data->iSkillValues[k] = kOneHourSeconds;
+			}
+		}
+
+		// double tornado & venom spear range
+		if (skillArrayPointerId == Pikeman_Tornado_Range || skillArrayPointerId == Pikeman_VenomSpear_Range)
+		{
+			for ( int k = 0; k < 10; k++ )
+			{
+				data->iSkillValues[k] *= 2;
 			}
 		}
 
