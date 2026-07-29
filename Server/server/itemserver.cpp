@@ -2698,6 +2698,69 @@ int ItemServer::GetAgingType( UserData * pcUserData )
 
 		Item * pItem = (Item *)0x0786B838;
 
+		// Auto-age in LOOT_MODE: set age to the highest level requiring equipped sheltom.
+		// We age to (target-1) and return PlusOne so the legacy binary adds the final +1.
+		if ( LOOT_MODE )
+		{
+			INFO( "Auto-age: Begin for item (%s) at age (%d)", pItem->szItemName, pItem->sAgeLevel );
+
+			int sheltomCode = 0;
+			for ( int i = 0; i < 316; i++ )
+			{
+				DropItemData& item = pcUserData->sIntentoryItems[i];
+				if ( !item.iItemID || !item.iChk1 || !item.iChk2 )
+					continue;
+
+				if ( ((DWORD)item.iItemID & 0xFFFF0000) == ITEMTYPE_Sheltom )
+				{
+					sheltomCode = ((DWORD)item.iItemID >> 8) & 0xFF;
+					INFO( "Auto-age: Found sheltom in inventory slot %d: 0x%08X (code %d)", i, (DWORD)item.iItemID, sheltomCode );
+					break;
+				}
+			}
+
+			if ( sheltomCode > 0 )
+			{
+				DWORD dwSheltomID = (sheltomCode << 8) | 0x02350000;
+				auto pSheltomDef = ITEMSERVER->FindItemDefByCode( dwSheltomID );
+				INFO( "Auto-age: Equipped sheltom: (%s) [code %d]", pSheltomDef ? pSheltomDef->sItem.szItemName : "unknown", sheltomCode );
+
+				int targetAge = 0;
+				for ( int age = AGING_MAX - 1; age >= 0 && targetAge == 0; age-- )
+					for ( int i = 0; i < 12; i++ )
+						if ( iaSheltomAgingList[age][i] == sheltomCode )
+							{ targetAge = age + 1; break; }
+
+				if ( targetAge == 0 )
+				{
+					INFO( "Auto-age: Sheltom (%s) not found in iaSheltomAgingList — no auto-age possible", pSheltomDef ? pSheltomDef->sItem.szItemName : "unknown" );
+				}
+				else if ( pItem->sAgeLevel >= targetAge )
+				{
+					INFO( "Auto-age: Item already at age (%d) >= target (%d) — skipping", pItem->sAgeLevel, targetAge );
+				}
+				else
+				{
+					short originalAge = pItem->sAgeLevel;
+					pItem->sAgeLevel = 0;
+					pItem->eCraftType = ITEMCRAFTTYPE_Aging;
+					AGEHANDLER->OnUpAgeHandler( pItem, targetAge );
+					ITEMSERVER->UpdateIntegrity( pItem, -1 );
+					ITEMSERVER->SaveItemDataToDatabase( pItem );
+
+					USERSERVER->SendUserMiscCommandToOtherNearbyPlayers( pcUser, EUnitDataMiscCommand::COMMANDID_ShowSuccessAgingOrMixSkillAnimation );
+
+					INFO( "Auto-age: Direct set to age (%d) — legacy will skip its increment (age >= expected)", targetAge );
+
+					return (int)AgingResultType::PlusOne;
+				}
+			}
+			else
+			{
+				INFO( "Auto-age: No sheltom equipped — skipping" );
+			}
+		}
+
 		int iAgingLevel = (int)pItem->sAgeLevel + 1;
 
 		int iAgeTotal = AGING_MAX;
