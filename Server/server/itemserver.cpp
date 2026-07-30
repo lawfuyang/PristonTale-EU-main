@@ -2698,8 +2698,10 @@ int ItemServer::GetAgingType( UserData * pcUserData )
 
 		Item * pItem = (Item *)0x0786B838;
 
-		// Auto-age in LOOT_MODE: set age to the highest level requiring equipped sheltom.
-		// We age to (target-1) and return PlusOne so the legacy binary adds the final +1.
+		// Auto-age in LOOT_MODE: set age to the highest level where the equipped
+		// sheltom is the most-advanced (highest-tier) sheltom required for that level.
+		// We set age directly to targetAge and return PlusOne; the legacy binary
+		// skips its own +1 increment because the age is already at target.
 		if ( LOOT_MODE )
 		{
 			INFO( "Auto-age: Begin for item (%s) at age (%d)", pItem->szItemName, pItem->sAgeLevel );
@@ -2725,15 +2727,27 @@ int ItemServer::GetAgingType( UserData * pcUserData )
 				auto pSheltomDef = ITEMSERVER->FindItemDefByCode( dwSheltomID );
 				INFO( "Auto-age: Equipped sheltom: (%s) [code %d]", pSheltomDef ? pSheltomDef->sItem.szItemName : "unknown", sheltomCode );
 
+				// Find the highest age level where the equipped sheltom is the
+				// highest-tier (maximum) sheltom required for that age.
+				// This prevents over-aging: e.g. Murky (code 7) caps at age 6,
+				// because at age 7+ the table requires Devine (code 8) or higher.
 				int targetAge = 0;
-				for ( int age = AGING_MAX - 1; age >= 0 && targetAge == 0; age-- )
+				for ( int age = 0; age < AGING_MAX; age++ )
+				{
+					int maxSheltomInRow = 0;
 					for ( int i = 0; i < 12; i++ )
-						if ( iaSheltomAgingList[age][i] == sheltomCode )
-							{ targetAge = age + 1; break; }
+					{
+						if ( iaSheltomAgingList[age][i] > maxSheltomInRow )
+							maxSheltomInRow = iaSheltomAgingList[age][i];
+					}
+
+					if ( maxSheltomInRow == sheltomCode )
+						targetAge = age + 1;
+				}
 
 				if ( targetAge == 0 )
 				{
-					INFO( "Auto-age: Sheltom (%s) not found in iaSheltomAgingList — no auto-age possible", pSheltomDef ? pSheltomDef->sItem.szItemName : "unknown" );
+					INFO( "Auto-age: Sheltom (%s) not found as highest-tier in iaSheltomAgingList — no auto-age possible", pSheltomDef ? pSheltomDef->sItem.szItemName : "unknown" );
 				}
 				else if ( pItem->sAgeLevel >= targetAge )
 				{
@@ -2744,7 +2758,7 @@ int ItemServer::GetAgingType( UserData * pcUserData )
 					short originalAge = pItem->sAgeLevel;
 					pItem->sAgeLevel = 0;
 					pItem->eCraftType = ITEMCRAFTTYPE_Aging;
-					AGEHANDLER->OnUpAgeHandler( pItem, targetAge );
+					AGEHANDLER->OnUpAgeHandler( pItem, targetAge - 1);
 					ITEMSERVER->UpdateIntegrity( pItem, -1 );
 					ITEMSERVER->SaveItemDataToDatabase( pItem );
 
