@@ -1994,19 +1994,19 @@ BOOL ItemHandler::OnMatureStone( DWORD dwCode )
 		psItem = &INVENTORYITEMS[INVENTORYITEMSLOT[0].iItemIndex - 1];
 		if ( !CheckQuestItemAging( &psItem->sItem ) )
 		{
-			psItem->sItem.sMatureBar.sCur += 300;
+			psItem->sItem.sMatureBar.sCur += INT16_MAX;
 			if ( OnSendUpgradeAgingItem( psItem ) )
 				return TRUE;
 		}
 		// Shield, Orb
 		psItem = &INVENTORYITEMS[INVENTORYITEMSLOT[1].iItemIndex - 1];
-		psItem->sItem.sMatureBar.sCur += 300;
+		psItem->sItem.sMatureBar.sCur += INT16_MAX;
 		if ( OnSendUpgradeAgingItem( psItem ) )
 			return TRUE;
 
 		// Armor
 		psItem = &INVENTORYITEMS[INVENTORYITEMSLOT[2].iItemIndex - 1];
-		psItem->sItem.sMatureBar.sCur += 300;
+		psItem->sItem.sMatureBar.sCur += INT16_MAX;
 		if ( OnSendUpgradeAgingItem( psItem ) )
 			return TRUE;
 	}
