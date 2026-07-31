@@ -249,6 +249,28 @@ void ServerCore::LoadDirty()
 	LOOT_MODE = cReader.ReadInt("Event", "LootMode");
 	if (LOOT_MODE) INFO("Event> Loot Mode: CHEAT (no gold, perfect, class match, spec)");
 
+	//Unit status replication rate.
+	//Divisor of the 64 FPS user wheel: 8 = 8Hz, 4 = 16Hz, 2 = 32Hz, 1 = 64Hz.
+	//Higher rates cost CPU/bandwidth per (unit x user), so keep 8 for busy
+	//servers and lower it for local/single-player setups.
+	UNIT_STATUS_UPDATE_DIVISOR = cReader.ReadInt("Performance", "UnitStatusUpdateDivisor");
+	if (UNIT_STATUS_UPDATE_DIVISOR <= 0) UNIT_STATUS_UPDATE_DIVISOR = 8;
+
+	//Clamp to a power of two <= 8 so the (i % N) == (iWheel % N) wheel stays even
+	if (UNIT_STATUS_UPDATE_DIVISOR > 8) UNIT_STATUS_UPDATE_DIVISOR = 8;
+	else if (UNIT_STATUS_UPDATE_DIVISOR > 4) UNIT_STATUS_UPDATE_DIVISOR = 4;
+	else if (UNIT_STATUS_UPDATE_DIVISOR > 2) UNIT_STATUS_UPDATE_DIVISOR = 2;
+
+	INFO("Performance> Unit Status Update: %dHz (divisor %d)",
+		64 / UNIT_STATUS_UPDATE_DIVISOR, UNIT_STATUS_UPDATE_DIVISOR);
+
+	//How often the unit status-dirty window opens, in server frames.
+	UNIT_DIRTY_WINDOW_INTERVAL = cReader.ReadInt("Performance", "UnitDirtyWindowInterval");
+	if (UNIT_DIRTY_WINDOW_INTERVAL <= 0) UNIT_DIRTY_WINDOW_INTERVAL = 64;
+	if (UNIT_DIRTY_WINDOW_INTERVAL < 4) UNIT_DIRTY_WINDOW_INTERVAL = 4;
+
+	INFO("Performance> Unit Dirty Window: every %d frames", UNIT_DIRTY_WINDOW_INTERVAL);
+
 	//Aging no break  event
 	if (cReader.ReadOnOff("Event", "AgingHalfPrice"))
 	{

@@ -3113,9 +3113,14 @@ void UnitServer::Update()
 	static UINT iActiWheel = 0;
 
 	//Check if action wheel must be set
+	//UNIT_DIRTY_WINDOW_INTERVAL (server.ini [Performance]) controls how often
+	//the status-dirty window opens. Default 64 frames (~1s) matches the
+	//original behaviour; lower values refresh idle units more often.
+	//Note this is only the *baseline* refresh - HP changes now flag units
+	//immediately via UnitData::MarkStatusDirty().
 	if ( iActiWheel == 0 )
 	{
-		if ( (iUnitWheel % 64) == 0 )
+		if ( (iUnitWheel % (UINT)UNIT_DIRTY_WINDOW_INTERVAL) == 0 )
 			iActiWheel = 4;
 	}
 	else

@@ -106,6 +106,10 @@ extern BOOL								ALWAYS_AGING_SUCCESS;
 
 extern int								LOOT_MODE;
 
+//Unit status replication tuning (see server.ini [Performance])
+extern int								UNIT_STATUS_UPDATE_DIVISOR;
+extern int								UNIT_DIRTY_WINDOW_INTERVAL;
+
 //FURY ARENA
 extern BOOL								bFuryArenaEnabled;
 extern int								iFuryArenaKingFuryExpInitial;

@@ -4,6 +4,40 @@
 Unit pcaUnitServer[MAX_UNITS];
 
 
+#ifndef _GAME
+/// <summary>
+/// Flag a unit as having changed so that UserServer::LoopUnits() will actually
+/// transmit its status (including HP) on the next pass.
+///
+/// Without this, HP changes are only picked up by UnitServer::Update()'s
+/// iActiWheel window, which opens for 4 frames out of every 64 (~6% duty
+/// cycle), adding up to ~940ms of latency before the client sees a new HP
+/// value. Damage application is an event, so it should mark the unit dirty
+/// immediately rather than waiting to be polled.
+///
+/// Also re-serializes baUnitBufferNew so the packet that LoopUnits() sends
+/// carries the new HP rather than a stale snapshot.
+/// </summary>
+void UnitData::MarkStatusDirty()
+{
+	//Only meaningful on the game server, which owns unit state
+	if ( !GAME_SERVER )
+		return;
+
+	Unit * pcUnit = this->pcUnit;
+
+	if ( pcUnit == NULL || pcUnit->pcUnitData != this )
+		return;
+
+	//Re-serialize so the wire buffer reflects the new HP immediately
+	this->MakeUnitBufferData( (char*)pcUnit->baUnitBufferNew, 0x10, 4 );
+
+	//Bump the revision counter LoopUnits() compares against
+	pcUnit->uLastUpdate++;
+}
+#endif
+
+
 ECharacterGender UnitData::GetCharacterGender()
 {
 	if( this->sCharacterData.iClass == 3 || this->sCharacterData.iClass == 5 || this->sCharacterData.iClass == 8 || this->sCharacterData.iClass == 9 )
@@ -130,6 +164,8 @@ void UnitData::SetCurrentHealthToMax ()
 {
 #ifndef _GAME
 
+	const int iPreviousHealth = GetCurrentHealth();
+
 	if ( this->IsNonPlayerMonster() )
 	{
 		Unit * pcUnit = UNITDATATOUNIT( this );
@@ -145,6 +181,10 @@ void UnitData::SetCurrentHealthToMax ()
 	{
 		this->sCharacterData.sHP.sCur = this->sCharacterData.sHP.sMax;
 	}
+
+	//Flag for immediate replication if the HP actually moved
+	if ( GetCurrentHealth() != iPreviousHealth )
+		MarkStatusDirty();
 
 #endif
 }
@@ -177,12 +217,19 @@ void UnitData::SetCurrentHealth( int iValue )
 {
 #ifndef _GAME
 
+	//Remember the old value so the unit is only flagged dirty on a real change
+	const int iPreviousHealth = GetCurrentHealth();
+
 	if ( iValue <= 0 )
 	{
 		this->sCharacterData.sHP.sCur = 0;
 		this->pcUnit->sHPLong.iMin = 0;
 		this->sHPBlocks.sCur = 0;
 		this->sVirtualHP.sCur = 0;
+
+		if ( iPreviousHealth != 0 )
+			MarkStatusDirty();
+
 		return;
 	}
 
@@ -209,7 +256,9 @@ void UnitData::SetCurrentHealth( int iValue )
 		}
 	}
 
-
+	//Flag for immediate replication if the HP actually moved
+	if ( GetCurrentHealth() != iPreviousHealth )
+		MarkStatusDirty();
 
 #endif
 }

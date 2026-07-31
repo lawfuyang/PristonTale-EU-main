@@ -878,6 +878,12 @@ public:
 	int								ApplyDamageOverTime( int iValue, bool bAllowKill );
 	void							GiveHealth( int iValue );
 
+#ifndef _GAME
+	//Flags this unit's status as changed so it replicates to clients immediately.
+	//Member function only - does not affect UnitData's fixed layout.
+	void							MarkStatusDirty();
+#endif
+
 	char							* GetName() { return this->sCharacterData.szName; };
 
 	void							Main();

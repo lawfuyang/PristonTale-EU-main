@@ -15,6 +15,7 @@ Examples of material that belongs here:
 ## Available studies
 
 - [game-exe-buildability-and-offline-feasibility.md](game-exe-buildability-and-offline-feasibility.md): verifies whether the client can be compiled, root-causes the build failures, and assesses whether a single serverless `game.exe` is achievable
+- [monster-hp-update-latency-analysis.md](monster-hp-update-latency-analysis.md): root-causes the delay between dealing damage and the monster HP bar updating (server-side update-rate throttling, not networking)
 
 Practical rule:
 

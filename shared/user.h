@@ -467,6 +467,12 @@ public:
 	BOOL									b32;  //2 times per second
 	BOOL									b64;  //1 times per second
 
+	//Unit (monster/NPC) status replication tick. Rate is controlled by
+	//UNIT_STATUS_UPDATE_DIVISOR from server.ini: 8 = 8Hz ... 1 = 64Hz.
+	//Kept separate from b8/b16/b32/b64 so monster HP can update faster than
+	//the legacy "deep status" cadence without disturbing other systems.
+	BOOL									bUnitStatus;
+
 	UINT									iSecondTick; //play time in seconds (roughly). use iSecondTick % 60 for ~ 1 minute interval updates etc
 	BOOL									bTenSeconds; //flag to allow process
 	BOOL									bOneMin; //flag to allow process

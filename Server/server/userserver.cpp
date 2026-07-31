@@ -1456,6 +1456,19 @@ void UserServer::Update()
 					UpdateUnitStatus( pcUser );		//64 FPS
 					//UpdateSkillStatus ( pcUser );	//64 FPS
 
+					//Unit (monster/NPC) status replication tick.
+					//UNIT_STATUS_UPDATE_DIVISOR: 8 = 8Hz (legacy-ish), 4 = 16Hz,
+					//2 = 32Hz, 1 = 64Hz (every frame, no load spreading).
+					if ( UNIT_STATUS_UPDATE_DIVISOR <= 1 )
+					{
+						pcUser->bUnitStatus = TRUE;
+					}
+					else
+					{
+						pcUser->bUnitStatus =
+							( ( i % UNIT_STATUS_UPDATE_DIVISOR ) == ( iWheel % UNIT_STATUS_UPDATE_DIVISOR ) );
+					}
+
 					//8 times per second
 					if ( ( i % 8 ) == ( iWheel % 8 ) )
 					{
@@ -1714,6 +1727,18 @@ void UserServer::Loop()
 		User * pcUser = pcaUserInGame[i];
 		UserData * pcUserData = pcUser->pcUserData;
 
+		//Unit (monster/NPC) status - rate set by UNIT_STATUS_UPDATE_DIVISOR.
+		//Hoisted out of the b64 (1Hz) "deep status" tier so monster HP bars
+		//track damage closely instead of lagging up to a second behind.
+		if ( pcUser->bUnitStatus )
+		{
+			if ( ( TICKCOUNT - pcUserData->dwTimeLastPacket ) < USER_STATUS_UPDATE_GRACE )
+			{
+				//Send Unit Status of other Monsters to this User
+				LoopUnits( pcUser );
+			}
+		}
+
 		//8 times per second
 		if ( pcUser->b8 )
 		{
@@ -1730,9 +1755,6 @@ void UserServer::Loop()
 					if ( pcUser->b64 )
 					{
 						DAMAGEHANDLER->UserTick1s( pcUser );
-
-						//Send Unit Status of other Monsters to this User
-						LoopUnits( pcUser );
 
 						if ( GAME_SERVER )
 						{

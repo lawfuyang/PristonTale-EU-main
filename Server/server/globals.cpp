@@ -32,6 +32,14 @@ BOOL							ALWAYS_AGING_SUCCESS	= FALSE;
 
 int								LOOT_MODE				= 0;
 
+//Unit (monster/NPC) status replication tuning. See server.ini [Performance].
+//UNIT_STATUS_UPDATE_DIVISOR: how often LoopUnits() runs, as a divisor of the
+//  64 FPS user wheel. 8 = 8Hz, 4 = 16Hz, 2 = 32Hz, 1 = 64Hz (every frame).
+//UNIT_DIRTY_WINDOW_INTERVAL: how often UnitServer::Update() opens its
+//  status-dirty window (in frames). Lower = more frequent baseline updates.
+int								UNIT_STATUS_UPDATE_DIVISOR	= 8;
+int								UNIT_DIRTY_WINDOW_INTERVAL	= 64;
+
 //FURY ARENA
 BOOL							bFuryArenaEnabled;
 
