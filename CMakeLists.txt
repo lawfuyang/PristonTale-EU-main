@@ -217,10 +217,8 @@ add_custom_command(TARGET server POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:server>"
         "${CMAKE_CURRENT_SOURCE_DIR}/Files/Server/game-server/server.dll"
-    COMMENT "Deploying server.dll to login-server and game-server..."
-    
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:game>"
         "${GAME_RUNTIME_DIR}/game.dll"
-    COMMENT "Deploying game.dll to game..."
+    COMMENT "Deployed server.dll and game.dll to directories"
 )
