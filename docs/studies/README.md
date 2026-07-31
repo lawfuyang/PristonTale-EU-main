@@ -16,6 +16,7 @@ Examples of material that belongs here:
 
 - [game-exe-buildability-and-offline-feasibility.md](game-exe-buildability-and-offline-feasibility.md): verifies whether the client can be compiled, root-causes the build failures, and assesses whether a single serverless `game.exe` is achievable
 - [monster-hp-update-latency-analysis.md](monster-hp-update-latency-analysis.md): root-causes the delay between dealing damage and the monster HP bar updating (server-side update-rate throttling, not networking)
+- [server-to-client-logic-migration-analysis.md](server-to-client-logic-migration-analysis.md): assesses how much game server and login server logic can be migrated into `game.dll`, maps the five layers of update cadence, and identifies the collapse of both server processes into one as the highest-value change
 
 Practical rule:
 
