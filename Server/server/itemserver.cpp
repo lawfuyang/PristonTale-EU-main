@@ -1915,6 +1915,10 @@ void ItemServer::CreatePerfectItem( Item * psOut, DefinitionItem * psIn, EItemSo
 	*( UINT* )0x8B70264 = 0;
 	*( UINT* )0x8B70268 = 0;
 	psOut->iItemSpecialType = 1;
+
+	// Apply class-based stat requirement adjustments so that perfect items
+	// from drops/coinshop/manufacture have the same requirements as /getitem.
+	OnSetItemPerfect( psOut );
 }
 
 /// <summary>
