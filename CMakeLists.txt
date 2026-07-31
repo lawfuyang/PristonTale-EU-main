@@ -128,17 +128,6 @@ set_target_properties(server PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-# Post-build: auto-deploy to both server directories
-add_custom_command(TARGET server POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:server>"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Files/Server/login-server/server.dll"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:server>"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Files/Server/game-server/server.dll"
-    COMMENT "Deploying server.dll to login-server and game-server..."
-)
-
 # ============================================================================
 # Game (client) DLL
 #
@@ -218,31 +207,20 @@ set_target_properties(game PROPERTIES
 # (see .gitignore), so an overwrite is unrecoverable. A one-time .orig backup
 # is therefore taken before the first deploy. Deployment is opt-in for the
 # same reason: a game.dll built against a different Game.exe will crash.
-option(DEPLOY_GAME_DLL "Copy the built game.dll into Files/Game after build" OFF)
+set(GAME_RUNTIME_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Files/Game")
 
-if(DEPLOY_GAME_DLL)
-    set(GAME_RUNTIME_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Files/Game")
-
-    # Preserve the original shipped DLL exactly once, before it is ever touched.
-    if(EXISTS "${GAME_RUNTIME_DIR}/game.dll"
-       AND NOT EXISTS "${GAME_RUNTIME_DIR}/game.dll.orig")
-        configure_file(
-            "${GAME_RUNTIME_DIR}/game.dll"
-            "${GAME_RUNTIME_DIR}/game.dll.orig"
-            COPYONLY
-        )
-        message(STATUS "Backed up original runtime DLL to Files/Game/game.dll.orig")
-    endif()
-
-    add_custom_command(TARGET game POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_FILE:game>"
-            "${GAME_RUNTIME_DIR}/game.dll"
-        COMMENT "Deploying game.dll to Files/Game..."
-    )
-else()
-    add_custom_command(TARGET game POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo
-            "game.dll built. Re-run cmake with -DDEPLOY_GAME_DLL=ON to deploy to Files/Game."
-    )
-endif()
+# Post-build: auto-deploy to both server directories
+add_custom_command(TARGET server POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:server>"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Files/Server/login-server/server.dll"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:server>"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Files/Server/game-server/server.dll"
+    COMMENT "Deploying server.dll to login-server and game-server..."
+    
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:game>"
+        "${GAME_RUNTIME_DIR}/game.dll"
+    COMMENT "Deploying game.dll to game..."
+)
