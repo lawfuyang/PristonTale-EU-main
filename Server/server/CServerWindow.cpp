@@ -43,18 +43,35 @@ UINT CServerWindow::Init()
 
 	bExit = FALSE;
 
-	//Load Settings
-	CConfigFileReader * pcConfigFileReader = new CConfigFileReader( "server.ini" );
-	if( pcConfigFileReader->Open() )
+	//Clock thread interval.
+	//
+	//SERVER_UPDATE_INTERVAL_MS was already populated by ServerCore::LoadDirty(),
+	//which runs inside Server::Load() above, so server.ini has been parsed by
+	//this point.
+	//
+	//The frame accumulator in Update() targets 15.625ms (64 FPS). The legacy
+	//hardcoded Sleep(15) beats against that target - at default 15.6ms timer
+	//granularity a "15ms" sleep overshoots, so Loop() runs 0, 1 or 2 times per
+	//wake instead of once. Requesting 1ms timer resolution and a shorter sleep
+	//lets the accumulator fire on schedule.
+	//
+	//This does not spin: UpdaterThread uses SendMessageA(), which blocks until
+	//the main thread has finished the frame, so the loop is self-limiting.
+	dwUpdateTimeInterval = (DWORD)SERVER_UPDATE_INTERVAL_MS;
+
+	if( dwUpdateTimeInterval < 15 )
 	{
-		//dwUpdateTimeInterval = 100; //10 times per second (10Hz / 10FPS)
-		dwUpdateTimeInterval = 15; //~60 times per second (~60FPS)
-
-		pcConfigFileReader->Close();
+		//Raise system timer resolution so short sleeps are honoured.
+		//Released in Shutdown().
+		if( timeBeginPeriod( 1 ) == TIMERR_NOERROR )
+			bHighResolutionTimer = TRUE;
+		else
+			LOGERROR( "timeBeginPeriod(1) failed; clock may be coarse" );
 	}
-	SAFE_DELETE( pcConfigFileReader );
 
-
+	INFO( "Performance> Clock thread interval: %dms%s",
+		dwUpdateTimeInterval,
+		bHighResolutionTimer ? " (1ms timer resolution)" : "" );
 
 	return 1;
 }
@@ -77,6 +94,12 @@ BOOL CServerWindow::Shutdown()
 
 	RemoveWindow();
 	Unregister();
+
+	if( bHighResolutionTimer )
+	{
+		timeEndPeriod( 1 );
+		bHighResolutionTimer = FALSE;
+	}
 
 	
 	return FALSE;

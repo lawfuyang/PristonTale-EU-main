@@ -35,4 +35,7 @@ protected:
 	CServer					* pServer;
 	CServerConfig			* pConfig;
 
+	//TRUE if timeBeginPeriod(1) succeeded and still needs releasing
+	BOOL					  bHighResolutionTimer = FALSE;
+
 };

@@ -1469,37 +1469,43 @@ void UserServer::Update()
 							( ( i % UNIT_STATUS_UPDATE_DIVISOR ) == ( iWheel % UNIT_STATUS_UPDATE_DIVISOR ) );
 					}
 
-					//8 times per second
-					if ( ( i % 8 ) == ( iWheel % 8 ) )
-					{
-						pcUser->b8 = TRUE;
-					}
-					else
-					{
-						pcUser->b8 = FALSE;
-					}
+					//User (player) status tiers.
+					//
+					//USER_STATUS_UPDATE_DIVISOR scales b8/b16/b32 together:
+					//8 = original (8Hz/4Hz/2Hz), 1 = all every frame (64Hz).
+					//
+					//The (i % N) == (iWheel % N) form smears users across the
+					//wheel by slot index, which spreads CPU cost on a busy
+					//server but adds up to N frames of latency per user. At
+					//divisor 1 the smearing is dropped entirely.
+					//
+					//b64 is NOT scaled: it gates UserTick1s() (regen, DoT,
+					//playtime) plus the 10s/60s derivations below, all of which
+					//are semantically per-second. It stays a true 1Hz.
+					const UINT uUserDiv = (UINT)USER_STATUS_UPDATE_DIVISOR;
 
-					//4 times per second
-					if ( pcUser->b8 && (i % 16) == (iWheel % 16))
+					if ( uUserDiv <= 1 )
 					{
+						pcUser->b8  = TRUE;
 						pcUser->b16 = TRUE;
-					}
-					else
-					{
-						pcUser->b16 = FALSE;
-					}
-
-					//2 times per second
-					if ( pcUser->b16 && (i % 32) == (iWheel % 32))
-					{
 						pcUser->b32 = TRUE;
 					}
 					else
 					{
-						pcUser->b32 = FALSE;
+						//8 times per second (at divisor 8)
+						pcUser->b8 = ( ( i % uUserDiv ) == ( iWheel % uUserDiv ) );
+
+						//4 times per second (at divisor 8)
+						pcUser->b16 = pcUser->b8 &&
+							( ( i % (uUserDiv * 2) ) == ( iWheel % (uUserDiv * 2) ) );
+
+						//2 times per second (at divisor 8)
+						pcUser->b32 = pcUser->b16 &&
+							( ( i % (uUserDiv * 4) ) == ( iWheel % (uUserDiv * 4) ) );
 					}
 
-					//1 time per second
+					//1 time per second - always, regardless of divisor.
+					//Gated on b32 so it still nests inside Loop()'s tier check.
 					if ( pcUser->b32 && ( i % 64 ) == ( iWheel % 64 ) )
 					{
 						//Deep Status Update
@@ -1727,51 +1733,54 @@ void UserServer::Loop()
 		User * pcUser = pcaUserInGame[i];
 		UserData * pcUserData = pcUser->pcUserData;
 
+		//Is this user still talking to us? Stale sessions get no updates.
+		const BOOL bWithinGrace =
+			( TICKCOUNT - pcUserData->dwTimeLastPacket ) < USER_STATUS_UPDATE_GRACE;
+
 		//Unit (monster/NPC) status - rate set by UNIT_STATUS_UPDATE_DIVISOR.
 		//Hoisted out of the b64 (1Hz) "deep status" tier so monster HP bars
 		//track damage closely instead of lagging up to a second behind.
-		if ( pcUser->bUnitStatus )
+		if ( pcUser->bUnitStatus && bWithinGrace )
 		{
-			if ( ( TICKCOUNT - pcUserData->dwTimeLastPacket ) < USER_STATUS_UPDATE_GRACE )
-			{
-				//Send Unit Status of other Monsters to this User
-				LoopUnits( pcUser );
-			}
+			//Send Unit Status of other Monsters to this User
+			LoopUnits( pcUser );
 		}
 
-		//8 times per second
-		if ( pcUser->b8 )
+		if ( bWithinGrace )
 		{
-			DWORD dwTimeDifference = TICKCOUNT - pcUserData->dwTimeLastPacket;
+			//Damage numbers: event-driven, not tier-gated.
+			//
+			//This used to sit behind b8 (8Hz), so a hit could wait up to 125ms
+			//to be reported even though the buffer was already full. The call
+			//is a no-op when sDamageInfoContainer.sAmount == 0, so running it
+			//every frame costs nothing while idle and reports damage on the
+			//frame it happened.
+			SendDamageInfoAndClearBuffer( pcUser );
 
-			if ( dwTimeDifference < USER_STATUS_UPDATE_GRACE )
+			//Other players' status. b32 implies b8, so flattening the old
+			//nested b8/b32 test preserves the original gating exactly.
+			if ( pcUser->b32 )
 			{
-				SendDamageInfoAndClearBuffer ( pcUser );
-
-				//0.5s interval
-				if ( pcUser->b32 )
+				//1 second interval - b64 is always a true 1Hz, see Update()
+				if ( pcUser->b64 )
 				{
-					//1 second interval
-					if ( pcUser->b64 )
+					DAMAGEHANDLER->UserTick1s( pcUser );
+
+					if ( GAME_SERVER )
 					{
-						DAMAGEHANDLER->UserTick1s( pcUser );
+						DWORD l_GameTime = GetTickCount();
 
-						if ( GAME_SERVER )
-						{
-							DWORD l_GameTime = GetTickCount();
+						PacketTransCommand l_Packet;
+						l_Packet.iHeader = PKTHDR_GameTimeSync;
+						l_Packet.iLength = sizeof( PacketTransCommand );
+						l_Packet.LParam = l_GameTime;
 
-							PacketTransCommand l_Packet;
-							l_Packet.iHeader = PKTHDR_GameTimeSync;
-							l_Packet.iLength = sizeof( PacketTransCommand );
-							l_Packet.LParam = l_GameTime;
-
-							PACKETSERVER->Send( pcUserData, &l_Packet );
-						}
+						PACKETSERVER->Send( pcUserData, &l_Packet );
 					}
-
-					//Send Unit Status of other Users to this User
-					LoopUsers ( pcUser );
 				}
+
+				//Send Unit Status of other Users to this User
+				LoopUsers ( pcUser );
 			}
 		}
 
@@ -2167,6 +2176,15 @@ void UserServer::LoopUsers( User * pcUser )
 
 								const UINT uIdleCounterOfOtherUser = pcUserData->uaUpdateCounter3_IdleCounter[uOtherIndex];
 
+								//These thresholds count LoopUsers() invocations,
+								//not milliseconds, and were written when
+								//LoopUsers() ran at a fixed 2Hz. If LoopUsers()
+								//is sped up via USER_STATUS_UPDATE_DIVISOR the
+								//thresholds must be scaled by the same factor,
+								//otherwise idle players would be retransmitted
+								//N times more often for no benefit.
+								const UINT uIdleScale = (UINT)USER_IDLE_THRESHOLD_SCALE;
+
 								BOOL bSkipUpdateOfOtherUser = TRUE;
 
 								switch ( pcOtherUser->uMovementStatus )
@@ -2174,7 +2192,7 @@ void UserServer::LoopUsers( User * pcUser )
 									case EPlayerMovementStatus::Standing_1_Sec:
 									{
 										//send every 1s
-										if ( uIdleCounterOfOtherUser >= 2 )
+										if ( uIdleCounterOfOtherUser >= 2 * uIdleScale )
 										{
 											bSkipUpdateOfOtherUser = FALSE;
 											break;
@@ -2185,7 +2203,7 @@ void UserServer::LoopUsers( User * pcUser )
 									case EPlayerMovementStatus::Standing_4_Sec:
 									{
 										//send every 2s
-										if ( uIdleCounterOfOtherUser >= 4 )
+										if ( uIdleCounterOfOtherUser >= 4 * uIdleScale )
 										{
 											bSkipUpdateOfOtherUser = FALSE;
 											break;
@@ -2197,7 +2215,7 @@ void UserServer::LoopUsers( User * pcUser )
 									case EPlayerMovementStatus::Standing_8_Sec:
 									{
 										//send every 4s
-										if ( uIdleCounterOfOtherUser >= 8 )
+										if ( uIdleCounterOfOtherUser >= 8 * uIdleScale )
 										{
 											bSkipUpdateOfOtherUser = FALSE;
 											break;
@@ -2210,7 +2228,7 @@ void UserServer::LoopUsers( User * pcUser )
 									default:
 									{
 										//send every 8s seconds
-										if ( uIdleCounterOfOtherUser >= 16 )
+										if ( uIdleCounterOfOtherUser >= 16 * uIdleScale )
 										{
 											bSkipUpdateOfOtherUser = FALSE;
 											break;
@@ -2240,7 +2258,9 @@ void UserServer::LoopUsers( User * pcUser )
 					pcUserData->uaUpdateCounter1_statusNum[uOtherIndex] = uUnitStatusNumOfOther;
 					pcUserData->uaUpdateCounter2_userID[uOtherIndex] = lOtherID;
 					pcUserData->uaUpdateCounter3_IdleCounter[uOtherIndex] = 0;
-					pcUserData->uaUpdateCounter4_DelaySend[uOtherIndex] = 4;		//delay send by ~2 second (not sure why)
+					//delay send by ~2 second (not sure why). Counted in
+					//LoopUsers() invocations, so scale with the update rate.
+					pcUserData->uaUpdateCounter4_DelaySend[uOtherIndex] = 4 * USER_IDLE_THRESHOLD_SCALE;
 					pcUser->uaUnitSkillHash[uOtherIndex] = 0;
 					uUnitStatusIndex = 4;
 					bForceDetailedStatus = TRUE;

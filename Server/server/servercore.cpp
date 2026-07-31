@@ -271,6 +271,38 @@ void ServerCore::LoadDirty()
 
 	INFO("Performance> Unit Dirty Window: every %d frames", UNIT_DIRTY_WINDOW_INTERVAL);
 
+	//User (player) status replication rate.
+	//Divisor of the 64 FPS user wheel driving b8/b16/b32: 8 = original
+	//(8Hz/4Hz/2Hz), 4 = 16Hz/8Hz/4Hz, 2 = 32Hz/16Hz/8Hz, 1 = 64Hz (no load
+	//spreading). b64 is deliberately left at a true 1Hz - it drives
+	//UserTick1s() (regen, damage-over-time, playtime), so raising it would
+	//multiply those rates.
+	USER_STATUS_UPDATE_DIVISOR = cReader.ReadInt("Performance", "UserStatusUpdateDivisor");
+	if (USER_STATUS_UPDATE_DIVISOR <= 0) USER_STATUS_UPDATE_DIVISOR = 8;
+
+	//Clamp to a power of two <= 8 so the (i % N) == (iWheel % N) wheel stays even
+	if (USER_STATUS_UPDATE_DIVISOR > 8) USER_STATUS_UPDATE_DIVISOR = 8;
+	else if (USER_STATUS_UPDATE_DIVISOR > 4) USER_STATUS_UPDATE_DIVISOR = 4;
+	else if (USER_STATUS_UPDATE_DIVISOR > 2) USER_STATUS_UPDATE_DIVISOR = 2;
+
+	//LoopUsers() idle-resend thresholds are counted in invocations and were
+	//written for 2Hz. Scale them so idle bandwidth stays constant.
+	USER_IDLE_THRESHOLD_SCALE = 8 / USER_STATUS_UPDATE_DIVISOR;
+
+	INFO("Performance> User Status Update: %dHz other-player status (divisor %d, idle scale x%d)",
+		16 / USER_STATUS_UPDATE_DIVISOR,
+		USER_STATUS_UPDATE_DIVISOR,
+		USER_IDLE_THRESHOLD_SCALE);
+
+	//Clock thread sleep interval. The frame accumulator targets 15.625ms, so a
+	//15ms sleep at default timer resolution beats against it. 1ms (with
+	//timeBeginPeriod(1), requested in CServerWindow::Init) removes that jitter.
+	SERVER_UPDATE_INTERVAL_MS = cReader.ReadInt("Performance", "UpdateIntervalMs");
+	if (SERVER_UPDATE_INTERVAL_MS <= 0) SERVER_UPDATE_INTERVAL_MS = 15;
+	if (SERVER_UPDATE_INTERVAL_MS > 100) SERVER_UPDATE_INTERVAL_MS = 100;
+
+	INFO("Performance> Server Clock Interval: %dms", SERVER_UPDATE_INTERVAL_MS);
+
 	//Aging no break  event
 	if (cReader.ReadOnOff("Event", "AgingHalfPrice"))
 	{

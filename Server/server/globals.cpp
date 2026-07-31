@@ -40,6 +40,25 @@ int								LOOT_MODE				= 0;
 int								UNIT_STATUS_UPDATE_DIVISOR	= 8;
 int								UNIT_DIRTY_WINDOW_INTERVAL	= 64;
 
+//User (player) status replication tuning. See server.ini [Performance].
+//USER_STATUS_UPDATE_DIVISOR: divisor of the 64 FPS user wheel that drives the
+//  b8/b16/b32 tiers. 8 = original (b8=8Hz, b16=4Hz, b32=2Hz), 1 = every frame.
+//  Note b64 always stays at a true 1Hz because UserTick1s() drives regen/DoT.
+int								USER_STATUS_UPDATE_DIVISOR	= 8;
+
+//LoopUsers() contains idle-resend timers counted in invocations, not in time
+//(thresholds 2/4/8/16 assume LoopUsers() runs at 2Hz). When LoopUsers() is
+//sped up, those thresholds must be multiplied by the same factor or idle
+//players would be retransmitted N times more often. 8/divisor gives that
+//factor: divisor 8 -> 1 (original), divisor 1 -> 8.
+int								USER_IDLE_THRESHOLD_SCALE	= 1;
+
+//Sleep interval of the clock thread that drives the server frame, in ms.
+//The frame accumulator wants 15.625ms (64 FPS); a 15ms sleep with default
+//timer resolution actually yields ~15.6ms+ and beats against it. Lower values
+//(with timeBeginPeriod) let the accumulator hit its target reliably.
+int								SERVER_UPDATE_INTERVAL_MS	= 15;
+
 //FURY ARENA
 BOOL							bFuryArenaEnabled;
 

@@ -1733,6 +1733,10 @@ BOOL CDamageHandler::ApplyDistortion( User * pcAttacker, ElementalAttackSetting 
 			pcUnitData->bDistortion = TRUE;
 			pcUnitData->pcUnit->bCursed = FALSE;
 			pcUnitData->iIceOverlay = FALSE;
+
+			//Visual state changed - replicate on the next frame instead of
+			//waiting for the unit dirty window to come round.
+			pcUnitData->MarkStatusDirty();
 		}
 	}
 	else if (p_Target->IsTargetPlayer() && dmg > 0)
@@ -1813,6 +1817,9 @@ BOOL CDamageHandler::ApplyCurse( User * pcAttacker, ElementalAttackSetting * sSe
 
 			pcUnitData->bDistortion = FALSE;
 			pcUnitData->iIceOverlay = FALSE;
+
+			//Visual state changed - replicate on the next frame
+			pcUnitData->MarkStatusDirty();
 		}
 	}
 
@@ -1893,6 +1900,9 @@ BOOL CDamageHandler::ApplyFreezing( User * pcAttacker, ElementalAttackSetting * 
 				pcUnitData->pcUnit->bCursed = FALSE;
 				pcUnitData->bDistortion = FALSE;
 				pcUnitData->iIceOverlay = TRUE;
+
+				//Visual state changed - replicate on the next frame
+				pcUnitData->MarkStatusDirty();
 			}
 		}
 

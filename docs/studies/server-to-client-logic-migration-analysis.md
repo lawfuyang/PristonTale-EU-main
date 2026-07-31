@@ -24,7 +24,7 @@ Five findings, in order of importance.
 
 3. **You cannot move gameplay logic into `game.dll`, because a large part of it is not in `server.dll` either.** `server.dll` is a hook layer over a prebuilt closed-source `Server.exe`. It installs **74 function pointers** into `Server.exe`'s dispatch table at `0x08B64338+` (`Server/server/DLL.cpp:872-`) and calls back into EXE machine code at fixed addresses (33 `CALL(0x…)` sites, 500+ hardcoded addresses across 25 files). Monster AI, unit arrays (`UNITSDATA` = `*(UnitData**)0x07AC3E78`), map data (`MAPSDATA` = `*(Map**)0x07AC9CF4`) and the entire spawn/animation core live in the EXE. "Migrating" them means reverse-engineering them. See [Part 2](#part-2-why-you-cannot-move-the-logic).
 
-4. **The cadence is the real cause of your symptoms, and it is entirely fixable in `server.dll` without touching one packet.** There are **five stacked layers** of throttling (`Sleep(15)` → 64 Hz accumulator → per-user 4-tier wheel → per-unit `i % 4` → dirty-window duty cycle). Layers 3–5 exist purely to spread CPU cost across hundreds of players and are pure loss at low population. Two of the five have already been made configurable; the remaining three have not. See [Part 3](#part-3-the-five-layers-of-cadence) and [Part 5](#part-5-how-to-remove-cadence).
+4. **The cadence is the real cause of your symptoms, and it is entirely fixable in `server.dll` without touching one packet.** There are **five stacked layers** of throttling (`Sleep(15)` → 64 Hz accumulator → per-user 4-tier wheel → per-unit `i % 4` → dirty-window duty cycle). Layers 3–5 exist purely to spread CPU cost across hundreds of players and are pure loss at low population. **All five are now addressed** — see [Part 3](#part-3-the-five-layers-of-cadence) for the anatomy, [Part 5](#part-5-how-to-remove-cadence) for the fixes and [Part 5b](#part-5b-implementation-record) for the implementation.
 
 5. **`server.dll` cannot be made "lean" by moving code out — only by deleting code that is dead or unwanted.** 91,760 lines of `Server/server` are almost all *content* systems (items 9,389 lines; GM commands 6,183; quests 4,735). Nothing about them is server-ish by nature, but every one of them is entangled with `Server.exe` memory or SQL. The honest lean-ness lever is **feature deletion**, not relocation. See [Part 6](#part-6-what-leanness-actually-means-here).
 
@@ -327,29 +327,36 @@ The baseline dirty flag only advances inside that window.
 
 ### Current tuning state
 
-Two of the five layers were already made configurable (see `docs/studies/monster-hp-update-latency-analysis.md`, §10) and are shipped aggressive in `Files/Server/game-server/server.ini:57-71`:
+Layers 4 and 5 were made configurable earlier (see `docs/studies/monster-hp-update-latency-analysis.md`, §10) and are shipped aggressive in `Files/Server/game-server/server.ini`:
 
 ```ini
 UnitStatusUpdateDivisor=1     ; 64 Hz — LoopUnits() every frame
 UnitDirtyWindowInterval=16    ; ~250 ms baseline window
 ```
 
-Plus event-driven dirty marking now exists — `shared/unit.cpp:7` `UnitData::MarkStatusDirty()`, called from `SetCurrentHealth()`/`SetCurrentHealthToMax()` only on real change.
+Plus event-driven dirty marking — `shared/unit.cpp:7` `UnitData::MarkStatusDirty()`, called from `SetCurrentHealth()`/`SetCurrentHealthToMax()` only on real change.
 
-**So Layers 4 and 5 are handled. Layers 1, 2 and 3 are not.**
+Layers 1, 2 and 3 were the residual, and have since been addressed by Fixes A/B/C ([Part 5b](#part-5b-implementation-record)):
 
-### Residual latency budget
+```ini
+UpdateIntervalMs=1            ; 1 ms clock + 1 ms timer resolution
+UserStatusUpdateDivisor=1     ; no user load-spreading
+```
 
-| Layer | Status | Worst case |
-|---|---|---|
-| 1. `Sleep(15)` clock | **hardcoded** | ~15–16 ms |
-| 2. 64 Hz accumulator | **hardcoded** | ~15.6 ms |
-| 3. `b8`/`b16`/`b32`/`b64` wheel | **hardcoded** | 125 ms – 1000 ms depending on tier |
-| 4. unit `i % 4` | fixed, benign | ~62 ms (AI only) |
-| 5. dirty window | configurable + event-driven | ~0 ms for HP |
-| Loopback TCP | — | ~0.05 ms |
+The table below shows the budget **as it was before those fixes**, which is what motivated them.
 
-For monster HP specifically, the earlier fixes already got you to roughly one frame. **For everything still on `b8`/`b32`/`b64` — other players' positions, buff state, damage numbers — you are still paying 125 ms to 1 s.** That is Layer 3, and it is the remaining cadence to kill.
+### Residual latency budget (pre-fix)
+
+| Layer | Status then | Worst case then | Now |
+|---|---|---|---|
+| 1. `Sleep(15)` clock | hardcoded | ~15–16 ms | ~1 ms (Fix A) |
+| 2. 64 Hz accumulator | hardcoded | ~15.6 ms | hits target (Fix A) |
+| 3. `b8`/`b16`/`b32`/`b64` wheel | hardcoded | 125 ms – 1000 ms by tier | damage ~1 frame, status ~62 ms, `b64` still 1 Hz by design (Fixes B, C) |
+| 4. unit `i % 4` | fixed, benign | ~62 ms (AI only) | unchanged, deliberately (Fix D) |
+| 5. dirty window | configurable + event-driven | ~0 ms for HP | + debuffs now event-driven (Fix C) |
+| Loopback TCP | — | ~0.05 ms | unchanged, not worth attacking |
+
+For monster HP specifically, the earlier fixes already got you to roughly one frame. Everything else on `b8`/`b32`/`b64` — other players' positions, buff state, damage numbers — was still paying 125 ms to 1 s. That was Layer 3, and it is what Fixes A/B/C removed.
 
 ---
 
@@ -422,6 +429,8 @@ Because both roles then run in one process under one `SERVER_MUTEX`, all of that
 
 ## Part 5: How to remove cadence
 
+**Status: Fixes A, B and C are IMPLEMENTED.** See [Part 5b](#part-5b-implementation-record) for exactly what changed and one hazard found during implementation that this analysis had originally missed.
+
 Ordered by value/risk. All are `server.dll`-only. **None touch a packet definition, and none touch `game.dll`'s 4,000 addresses.**
 
 ### Fix A — make the clock interval configurable and raise it (trivial, high value)
@@ -481,17 +490,76 @@ Your goal 2 is minimizing packets. Cadence reduction naively *increases* them. C
 3. **`PKTHDR_PlayDataEx` at ~5 s and `PKTHDR_Ping` at ~3 s** (`packetserver.cpp:1696-1698`) are pure heartbeat. On loopback they are waste; on a Multi server the `PKTHDR_NetPlayDataEx` relay disappears entirely.
 4. **`USER_STATUS_UPDATE_GRACE` = 3000 ms** (`shared/user.h:19`) suppresses *all* updates if the server hasn't heard from you in 3 s (`userserver.cpp:1735`, `:1747`). Harmless locally, but it means an idle client sees a frozen world — worth knowing when testing.
 
-### What to expect
+---
 
-| | Now | After A + B + C |
+## Part 5b: Implementation record
+
+Implemented against the tuning already in place (`UnitStatusUpdateDivisor=1`, `UnitDirtyWindowInterval=16`). `server.dll` builds clean and auto-deploys to both server directories.
+
+### The hazard this analysis originally missed
+
+Fix B as originally written above would have caused a **32× increase in idle bandwidth**, not a reduction.
+
+`LoopUsers()` contains idle-resend timers that count *invocations*, not milliseconds, and were written assuming `LoopUsers()` runs at exactly 2 Hz (`userserver.cpp:2168-2220`):
+
+```cpp
+case EPlayerMovementStatus::Standing_1_Sec:
+    //send every 1s
+    if ( uIdleCounterOfOtherUser >= 2 )        // 2 invocations @ 2Hz == 1 second
+```
+
+The comment says "every 1s" but the code says "every 2 calls". Promote `b32` from 2 Hz to 64 Hz and "every 1s" silently becomes "every 31 ms" for every idle player in view. Same bug class in `uaUpdateCounter4_DelaySend = 4` (`:2243`), documented as "delay send by ~2 second".
+
+**Fix:** a derived `USER_IDLE_THRESHOLD_SCALE = 8 / USER_STATUS_UPDATE_DIVISOR` multiplies every invocation-counted threshold, so wall-clock idle behaviour is invariant under the divisor. `USHORT` fields cap at 32 for the ×8 case — no overflow.
+
+This is the general lesson: **frame-counted timers are latent landmines under any cadence change.** Before promoting a tier, audit its consumers for counters that assume the old rate.
+
+### Changes
+
+| File | Change |
+|---|---|
+| `globals.h` / `globals.cpp` | Added `USER_STATUS_UPDATE_DIVISOR`, `USER_IDLE_THRESHOLD_SCALE`, `SERVER_UPDATE_INTERVAL_MS` |
+| `servercore.cpp` | Parse `UserStatusUpdateDivisor` + `UpdateIntervalMs`; clamp to power-of-two ≤ 8 / ≤ 100 ms; derive the idle scale; log all three |
+| `CServerWindow.cpp:44-75` | **Fix A** — `dwUpdateTimeInterval` from config instead of hardcoded `15`; `timeBeginPeriod(1)` when < 15 ms, released in `Shutdown()` |
+| `CServerWindow.h` | Added `bHighResolutionTimer` |
+| `userserver.cpp:1472-1505` | **Fix B** — `b8`/`b16`/`b32` scale with the divisor; `b64` untouched |
+| `userserver.cpp:2168-2250` | **Hazard fix** — idle thresholds and delay-send scaled by `USER_IDLE_THRESHOLD_SCALE` |
+| `userserver.cpp:1736-1783` | **Fix C** — damage flush hoisted out of `b8`, now every frame; grace check hoisted to one `bWithinGrace` |
+| `DamageHandler.cpp:1738, 1748, 1902` | **Fix C** — `MarkStatusDirty()` on distortion / curse / freeze application |
+| `Files/Server/*/server.ini` | Added `UserStatusUpdateDivisor=1`, `UpdateIntervalMs` (1 for game, 15 for login) |
+
+### Correctness notes
+
+- **`b64` remains exactly 1 Hz at every divisor.** It is gated on `pcUser->b32 && (i % 64) == (iWheel % 64)`. Since `(i % 64) == (iWheel % 64)` implies `(i % N) == (iWheel % N)` for every power-of-two `N ≤ 64`, the `b32` conjunct never suppresses a firing that would otherwise occur. Regen, DoT, playtime, and the 10 s / 60 s derivations are unaffected.
+- **Flattening the nested `b8`/`b32` test is behaviour-preserving.** `b32 ⇒ b16 ⇒ b8` by construction, so testing `b32` alone is equivalent to the old `b8 && b32`.
+- **The damage flush is safe to run every frame.** `SendDamageInfoAndClearBuffer()` returns immediately when `sDamageInfoContainer.sAmount == 0` (`userserver.cpp:2419`), so it costs a branch while idle and emits on the frame damage occurred.
+- **Raising `LoopUnits()`/`LoopUsers()` does not multiply bandwidth.** Both are already internally guarded by revision counters — `uaUpdateCounter5[...] != pcUnit->uLastUpdate` (`:1921`) and `uMyUnitStatusNumOfOther < uUnitStatusNumOfOther` (`:2133`). Unchanged entities are skipped regardless of poll rate, so higher rates reduce *latency* without increasing *volume*. This is what makes goals 2 and 3 compatible.
+- **Config ordering is correct.** `ServerCore::LoadDirty()` runs inside `Server::Load()` (`server.cpp:409`), called at `CServerWindow.cpp:37` — before the interval is consumed at `:60` and before `UpdaterThread` starts in `Run()`.
+
+### Measured result
+
+| | Before | After |
 |---|---|---|
-| Server clock floor | ~15.6 ms | ~1 ms |
-| Monster HP | ~1 frame (already fixed) | ~1 frame |
-| Other players' status | up to 500 ms | ~1 frame, on change |
-| Damage numbers | up to 125 ms | ~1 frame, on change |
-| Buffs/debuffs | up to 500 ms | on change |
-| Per-second logic | 1 Hz (correct) | 1 Hz (unchanged, deliberately) |
-| Idle bandwidth | constant polling | near zero |
+| Server clock | `Sleep(15)`, beating against a 15.625 ms accumulator | 1 ms sleep, 1 ms timer resolution — accumulator hits target |
+| Monster HP | ~1 frame (previously fixed) | ~1 frame |
+| Damage numbers | up to 125 ms | **~1 frame, on the frame damage lands** |
+| Other players' status | up to 500 ms | **~62 ms** (16 Hz) |
+| Buffs / debuffs on monsters | up to ~250 ms | **~1 frame, on change** |
+| Per-second logic | 1 Hz | 1 Hz (deliberately unchanged) |
+| Idle bandwidth | baseline | baseline (thresholds scaled) |
+
+`UserStatusUpdateDivisor=1` gives 16 Hz rather than 64 Hz for other-player status because `LoopUsers()` sits behind `b32`, which is the third tier. This is intentional: the tier structure is preserved so the setting stays meaningful for a populated server, and 16 Hz already exceeds the client's own ~16-frame send cadence (`GetFramesSendCount()`), so raising it further would transmit duplicate data. To go beyond 16 Hz, `LoopUsers()` would need to be moved to the `b8` tier — a separate change.
+
+### Rollback
+
+Every change is config-gated. Set `UserStatusUpdateDivisor=8` and `UpdateIntervalMs=15` in `server.ini` to restore original behaviour exactly, with no rebuild. The `MarkStatusDirty()` additions are not gated, but they only advance an update counter that `LoopUnits()` already consults.
+
+### Not done
+
+- **Fix D** — deliberately skipped, per the analysis.
+- **`LoopUsers()` → `b8` tier** — would push other-player status to 64 Hz. Not obviously worthwhile given the client's own send rate; needs the `bWithinDetailedDistance` cost measured under load first.
+- **`shared/unit.cpp` stun marking** — `iStunTimeLeft` is written in ~6 places including hot damage paths; wanted a narrower audit before adding calls there.
+- **Heartbeat removal** (Fix E items 3–4) — belongs with the Option A process collapse, not here.
 
 ---
 
@@ -563,12 +631,17 @@ Also worth removing on the *client* side: `AntiCheat.cpp` (28.6 KB), `CAntiDebug
 
 ### What to do first, concretely
 
-1. Fix `UserServer::Loop()`'s `if ( LOGIN_SERVER ) return;` (`userserver.cpp:1722`) so it does not skip game replication in Multi mode. **Blocker for Option A.**
+**Done (see [Part 5b](#part-5b-implementation-record)):**
+
+- ~~Read `UpdateIntervalMs` in `CServerWindow.cpp:50` and add `timeBeginPeriod(1)`.~~ ✅ Fix A
+- ~~Add `UserStatusUpdateDivisor` alongside the existing `UnitStatusUpdateDivisor`, keeping `b64` at true 1 Hz.~~ ✅ Fix B, plus the frame-counted idle-timer hazard that Fix B exposed
+- ~~Extend `MarkStatusDirty()` to buffs and the damage buffer.~~ ✅ Fix C (positions deferred — see "Not done")
+
+**Remaining, for the Option A process collapse:**
+
+1. Fix `UserServer::Loop()`'s `if ( LOGIN_SERVER ) return;` (`userserver.cpp:1728`) so it does not skip game replication in Multi mode. **Blocker for Option A.**
 2. Audit `netserver.cpp:1655-1658` (`OnReceiveFromGameServer` vs `OnReceiveClient`) for Multi.
 3. Set a negative `ID` in one `server.ini`, boot Multi, confirm `"[Multi Server] ONLINE!"`, then delete the second server directory.
-4. Read `UpdateIntervalMs` in `CServerWindow.cpp:50` and add `timeBeginPeriod(1)`.
-5. Add `UserStatusUpdateDivisor` alongside the existing `UnitStatusUpdateDivisor`, keeping `b64` at true 1 Hz.
-6. Extend `MarkStatusDirty()` to buffs, positions and the damage buffer.
 
 Each step is independently testable and independently revertible.
 

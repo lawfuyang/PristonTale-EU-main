@@ -110,6 +110,17 @@ extern int								LOOT_MODE;
 extern int								UNIT_STATUS_UPDATE_DIVISOR;
 extern int								UNIT_DIRTY_WINDOW_INTERVAL;
 
+//User (player) status replication tuning (see server.ini [Performance])
+extern int								USER_STATUS_UPDATE_DIVISOR;
+
+//Derived from USER_STATUS_UPDATE_DIVISOR. Factor by which LoopUsers() now runs
+//faster than its original 2Hz, used to keep frame-counted idle timers
+//time-equivalent. 1 = original cadence, 8 = LoopUsers() at 16Hz.
+extern int								USER_IDLE_THRESHOLD_SCALE;
+
+//Server clock thread sleep interval in ms (see server.ini [Performance])
+extern int								SERVER_UPDATE_INTERVAL_MS;
+
 //FURY ARENA
 extern BOOL								bFuryArenaEnabled;
 extern int								iFuryArenaKingFuryExpInitial;
