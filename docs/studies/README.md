@@ -12,6 +12,10 @@ Examples of material that belongs here:
 - binary format mapping such as `.chr`
 - source versus runtime comparison work
 
+## Available studies
+
+- [game-exe-buildability-and-offline-feasibility.md](game-exe-buildability-and-offline-feasibility.md): verifies whether the client can be compiled, root-causes the build failures, and assesses whether a single serverless `game.exe` is achievable
+
 Practical rule:
 
 - if the material is exploratory, experimental, or research-oriented, it belongs in `docs/studies/`

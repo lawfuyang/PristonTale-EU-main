@@ -259,6 +259,9 @@ int UnitData::ApplyDamageOverTime( int iValue, bool bAllowKill )
 	SetCurrentHealth( iNewHP );
 
 	return iCurr - iNewHP;
+#else
+	//Client builds compile out the body entirely; return no damage applied.
+	return 0;
 #endif
 }
 
