@@ -1377,7 +1377,9 @@ void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 		Archer_ArrowofRage_Area,
 		Archer_ElementalShot_LightningRange_New,
 		Archer_Perforation_AddShotRange,
-		Archer_Perforation_AttackWidth_New
+		Archer_Perforation_AttackWidth_New,
+
+		Fighter_RageofZecram_AttackRadius_New,
 	};
 
 	UINT uPosition = 0;
