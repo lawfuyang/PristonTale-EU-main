@@ -1380,6 +1380,7 @@ void CacheSkillArrayDataFromContainer ( PacketSkillDataContainer * container )
 		Archer_Perforation_AttackWidth_New,
 
 		Fighter_RageofZecram_AttackRadius_New,
+		Fighter_CycloneStrike_Range,
 	};
 
 	UINT uPosition = 0;
